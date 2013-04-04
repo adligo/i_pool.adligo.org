@@ -6,9 +6,12 @@ import java.util.Hashtable;
 import javax.naming.Context;
 
 import org.adligo.i.pool.I_PooledConnectionFactory;
+import org.adligo.i.pool.ldap.models.JavaToLdapConverters;
+import org.adligo.i.pool.ldap.models.LdapConnectionFactoryConfig;
 
 public class ReadWriteLdapConnectionFactory implements I_PooledConnectionFactory<ReadWriteLdapConnection> {
 	private Hashtable env;
+	private JavaToLdapConverters converters;
 	
 	@SuppressWarnings("unchecked")
 	public ReadWriteLdapConnectionFactory(LdapConnectionFactoryConfig config) {
@@ -25,10 +28,11 @@ public class ReadWriteLdapConnectionFactory implements I_PooledConnectionFactory
 			  env.put("java.naming.ldap.attributes.binary", binAttributeNames);
 		  }
 		  env.put(LdapConnection.CHUNK_SIZE_KEY, config.getDefaultChunkSize());
+		  converters = new JavaToLdapConverters(config);
 	}
 
 	@Override
 	public ReadWriteLdapConnection create() throws IOException {
-		return new ReadWriteLdapConnection(env);
+		return new ReadWriteLdapConnection(env, converters);
 	}
 }

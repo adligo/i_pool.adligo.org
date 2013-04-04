@@ -26,7 +26,7 @@ public class LdapEntryMutant implements I_LdapEntry {
 		}
 	}
 
-	public LdapEntryMutant(String dn, Attributes attribs) throws NamingException {
+	public LdapEntryMutant(String dn, Attributes attribs, JavaToLdapConverters converters) throws NamingException {
 		distinguishedName = dn;
 		attributeMutant = new LdapAttributesMutant();
 		NamingEnumeration<? extends Attribute> aa =  attribs.getAll();
@@ -37,6 +37,7 @@ public class LdapEntryMutant implements I_LdapEntry {
 			List<Object> toAdd = new ArrayList<Object>();
 			while (objs.hasMoreElements()) {
 				Object obj = objs.next();
+				obj = converters.toJava(key, obj);
 				toAdd.add(obj);
 			}
 			if (toAdd.size() == 1) {
@@ -86,6 +87,18 @@ public class LdapEntryMutant implements I_LdapEntry {
 		sb.append("\n");
 		sb.append(attributeMutant.toString());
 		return sb.toString();
+	}
+
+	public Boolean getBooleanAttribute(String key) {
+		return attributeMutant.getBooleanAttribute(key);
+	}
+
+	public Integer getIntegerAttribute(String key) {
+		return attributeMutant.getIntegerAttribute(key);
+	}
+
+	public List<Integer> getIntegerAttributes(String key) {
+		return attributeMutant.getIntegerAttributes(key);
 	}
 	
 }

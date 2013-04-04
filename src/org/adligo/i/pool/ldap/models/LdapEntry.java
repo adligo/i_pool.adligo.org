@@ -37,4 +37,16 @@ public class LdapEntry implements I_LdapEntry {
 	public String toString() {
 		return mutant.toString();
 	}
+
+	public Boolean getBooleanAttribute(String key) {
+		return mutant.getBooleanAttribute(key);
+	}
+
+	public Integer getIntegerAttribute(String key) {
+		return mutant.getIntegerAttribute(key);
+	}
+
+	public List<Integer> getIntegerAttributes(String key) {
+		return mutant.getIntegerAttributes(key);
+	}
 }

@@ -16,6 +16,7 @@ import javax.naming.directory.ModificationItem;
 import org.adligo.i.log.client.Log;
 import org.adligo.i.log.client.LogFactory;
 import org.adligo.i.pool.ldap.models.I_LdapEntry;
+import org.adligo.i.pool.ldap.models.JavaToLdapConverters;
 import org.adligo.i.pool.ldap.models.LdapEntryMutant;
 
 
@@ -30,8 +31,8 @@ public class ReadWriteLdapConnection extends LdapConnection {
 		return Collections.unmodifiableList(ignore);
 	}
 	
-	public ReadWriteLdapConnection(Hashtable<?, ?> env) {
-		super(env);
+	public ReadWriteLdapConnection(Hashtable<?, ?> env, JavaToLdapConverters ac) {
+		super(env, ac);
 	}
 
 	
@@ -50,10 +51,12 @@ public class ReadWriteLdapConnection extends LdapConnection {
 				List<Object> objs = entry.getAttributes(key);
 				if (objs.size() == 1) {
 					Object val = objs.get(0);
+					val = attributeConverter.toLdap(key, val);
 					BasicAttribute ba = new BasicAttribute(key, val);
 					attribs.put(ba);
 				} else {
 					for (Object obj: objs) {
+						obj = attributeConverter.toLdap(key, obj);
 						BasicAttribute ba = new BasicAttribute(key, obj);
 						attribs.put(ba);
 					}
@@ -103,6 +106,7 @@ public class ReadWriteLdapConnection extends LdapConnection {
 				List<Object> atribVals = e.getAttributes(atribName);
 				for (Object val: atribVals) {
 					if (!onDisk.hasAttribute(atribName, val)) {
+						val = attributeConverter.toLdap(atribName, val);
 						mods.add( new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute(atribName, val)));
 					}
 				}
@@ -115,6 +119,7 @@ public class ReadWriteLdapConnection extends LdapConnection {
 				List<Object> atribVals = onDisk.getAttributes(atribName);
 				for (Object val: atribVals) {
 					if (!e.hasAttribute(atribName, val)) {
+						val = attributeConverter.toLdap(atribName, val);
 						mods.add( new ModificationItem(DirContext.REMOVE_ATTRIBUTE, new BasicAttribute(atribName, val)));
 					}
 				}
@@ -154,6 +159,7 @@ public class ReadWriteLdapConnection extends LdapConnection {
 		markActive();
 		ModificationItem[] mods = new ModificationItem[1];
 		 
+		val = attributeConverter.toLdap(attributeName, val);
 		mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute(attributeName, val));
 		try {
 			ctx.modifyAttributes(dn, mods);

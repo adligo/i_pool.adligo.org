@@ -5,8 +5,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 import javax.naming.CommunicationException;
 import javax.naming.Context;
@@ -22,6 +20,7 @@ import org.adligo.i.log.client.Log;
 import org.adligo.i.log.client.LogFactory;
 import org.adligo.i.pool.PooledConnection;
 import org.adligo.i.pool.ldap.models.I_LdapEntry;
+import org.adligo.i.pool.ldap.models.JavaToLdapConverters;
 import org.adligo.i.pool.ldap.models.LdapEntry;
 import org.adligo.i.pool.ldap.models.LdapEntryMutant;
 
@@ -32,10 +31,12 @@ public abstract class LdapConnection extends PooledConnection {
 	Hashtable<?, ?> initalEnv;
 	private volatile boolean ok = true;
 	private int chunkSize;
+	JavaToLdapConverters attributeConverter;
 	
-	public LdapConnection(Hashtable<?,?> env) {
+	public LdapConnection(Hashtable<?,?> env, JavaToLdapConverters ac) {
 		initalEnv = (Hashtable) env.clone();
 		chunkSize = (Integer) env.get(CHUNK_SIZE_KEY);
+		attributeConverter = ac;
 		reconnect();
 	}
 
@@ -116,7 +117,7 @@ public abstract class LdapConnection extends PooledConnection {
 		markActive();
 		try {
 			Attributes attribs =  ctx.getAttributes(name);
-			LdapEntryMutant lem = new LdapEntryMutant(name, attribs);
+			LdapEntryMutant lem = new LdapEntryMutant(name, attribs, attributeConverter);
 			return new LdapEntry(lem);
 		} catch (NamingException ne) {
 			log.error(ne.getMessage(), ne);
@@ -159,7 +160,7 @@ public abstract class LdapConnection extends PooledConnection {
 			InitialDirContext authCtx = new InitialDirContext(authHash);
 			Attributes attribs =  authCtx.getAttributes(dn);
 			authCtx.close();
-			LdapEntryMutant lem = new LdapEntryMutant(dn, attribs);
+			LdapEntryMutant lem = new LdapEntryMutant(dn, attribs, attributeConverter);
 			return new LdapEntry(lem);
 		} catch (NamingException x) {
 			if (log.isDebugEnabled()) {

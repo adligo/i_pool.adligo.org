@@ -116,4 +116,37 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 		}
 		return false;
 	}
+
+	@Override
+	public Boolean getBooleanAttribute(String key) {
+		Object toRet = attribs.get(key);
+		if (toRet == null) {
+			return null;
+		}
+		return (Boolean) toRet;
+	}
+
+	@Override
+	public Integer getIntegerAttribute(String key) {
+		Object toRet = attribs.get(key);
+		if (toRet == null) {
+			return null;
+		}
+		return (Integer) toRet;
+	}
+
+	@Override
+	public List<Integer> getIntegerAttributes(String key) {
+		Object toRet = attribs.get(key);
+		if (toRet == null) {
+			return null;
+		}
+		List<Integer> list = new ArrayList<Integer>();
+		List<Object> toRetList = (List<Object>) toRet;
+		for (Object obj: toRetList) {
+			//add one at a time to make sure we cast correctly
+			list.add((Integer) obj);
+		}
+		return list;
+	}
 }
