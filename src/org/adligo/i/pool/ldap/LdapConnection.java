@@ -12,6 +12,7 @@ import javax.naming.CommunicationException;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.ServiceUnavailableException;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
@@ -94,13 +95,14 @@ public abstract class LdapConnection extends PooledConnection {
 				toRet.add(dn);
 			}
 			results.close();
-		} catch (CommunicationException g) {
-			reconnect();
-			if (isOK()) {
-				return search(name, filter, sc);
-			}
-		}catch (NamingException ne) {
+		} catch (NamingException ne) {
 			log.error(ne.getMessage(), ne);
+			if (isLdapServerDownException(ne)) {
+				reconnect();
+				if (isOK()) {
+					return search(name, filter, sc);
+				}
+			}
 		}
 		return toRet;
 	}
@@ -116,17 +118,27 @@ public abstract class LdapConnection extends PooledConnection {
 			Attributes attribs =  ctx.getAttributes(name);
 			LdapEntryMutant lem = new LdapEntryMutant(name, attribs);
 			return new LdapEntry(lem);
-		} catch (CommunicationException g) {
-			reconnect();
-			if (isOK()) {
-				return get(name);
-			}
 		} catch (NamingException ne) {
 			log.error(ne.getMessage(), ne);
+			if (isLdapServerDownException(ne)) {
+				reconnect();
+				if (isOK()) {
+					return get(name);
+				}
+			}
 		}
 		return null;
 	}
 	
+	public boolean isLdapServerDownException(NamingException x) {
+		if (x instanceof CommunicationException) {
+			return true;
+		}
+		if (x instanceof ServiceUnavailableException) {
+			return true;
+		}
+		return false;
+	}
 	/**
 	 * @param dn
 	 * @param password
@@ -149,14 +161,15 @@ public abstract class LdapConnection extends PooledConnection {
 			authCtx.close();
 			LdapEntryMutant lem = new LdapEntryMutant(dn, attribs);
 			return new LdapEntry(lem);
-		} catch (CommunicationException g) {
-			reconnect();
-			if (isOK()) {
-				return authenticate(dn, password);
-			}
 		} catch (NamingException x) {
 			if (log.isDebugEnabled()) {
 				log.debug(x.getMessage(), x);
+			}
+			if (isLdapServerDownException(x)) {
+				reconnect();
+				if (isOK()) {
+					return authenticate(dn, password);
+				}
 			}
 		}
 		return null;

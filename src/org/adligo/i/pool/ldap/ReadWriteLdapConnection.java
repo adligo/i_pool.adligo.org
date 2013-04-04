@@ -1,15 +1,12 @@
 package org.adligo.i.pool.ldap;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 
-import javax.naming.CommunicationException;
 import javax.naming.NamingException;
 import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.BasicAttributes;
@@ -65,13 +62,14 @@ public class ReadWriteLdapConnection extends LdapConnection {
 			DirContext dc = ctx.createSubcontext(dn, attribs);
 			dc.close();
 			return true;
-		} catch (CommunicationException g) {
-			reconnect();
-			if (isOK()) {
-				return create(entry);
-			}
 		} catch (NamingException x) {
 			log.error(x.getMessage(), x);
+			if (isLdapServerDownException(x)) {
+				reconnect();
+				if (isOK()) {
+					return create(entry);
+				}
+			}
 		}
 		return false;
 	}
@@ -81,13 +79,14 @@ public class ReadWriteLdapConnection extends LdapConnection {
 		try {
 			ctx.destroySubcontext(dn);
 			return true;
-		} catch (CommunicationException g) {
-			reconnect();
-			if (isOK()) {
-				return delete(dn);
-			}
 		} catch (NamingException x) {
 			log.error(x.getMessage(), x);
+			if (isLdapServerDownException(x)) {
+				reconnect();
+				if (isOK()) {
+					return delete(dn);
+				}
+			}
 		}
 		return false;
 	}
@@ -129,13 +128,14 @@ public class ReadWriteLdapConnection extends LdapConnection {
 			}
 			ctx.modifyAttributes(dn, modsArray);
 			return true;
-		} catch (CommunicationException g) {
-			reconnect();
-			if (isOK()) {
-				return update(e, ignoreAttributes);
-			}
-		} catch (NamingException x) {
+		}  catch (NamingException x) {
 			log.error(x.getMessage(), x);
+			if (isLdapServerDownException(x)) {
+				reconnect();
+				if (isOK()) {
+					return update(e, ignoreAttributes);
+				}
+			}
 		}
 		return false;
 	}
@@ -158,13 +158,14 @@ public class ReadWriteLdapConnection extends LdapConnection {
 		try {
 			ctx.modifyAttributes(dn, mods);
 			return true;
-		} catch (CommunicationException g) {
-			reconnect();
-			if (isOK()) {
-				return replaceAttribute(dn, attributeName, val);
-			}
 		} catch (NamingException x) {
 			log.error(x.getMessage(), x);
+			if (isLdapServerDownException(x)) {
+				reconnect();
+				if (isOK()) {
+					return replaceAttribute(dn, attributeName, val);
+				}
+			}
 		}
 		return false;
 	}
