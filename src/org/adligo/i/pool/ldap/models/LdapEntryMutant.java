@@ -16,9 +16,14 @@ public class LdapEntryMutant implements I_LdapEntry {
 		attributeMutant = new LdapAttributesMutant();
 	}
 	
-	public LdapEntryMutant(LdapEntryMutant e) {
-		distinguishedName = e.getDistinguishedName();
-		attributeMutant = new LdapAttributesMutant(e.attributeMutant);
+	public LdapEntryMutant(I_LdapEntry e) {
+		if (e instanceof LdapEntryMutant) {
+			distinguishedName = e.getDistinguishedName();
+			attributeMutant = new LdapAttributesMutant(((LdapEntryMutant) e).attributeMutant);
+		} else {
+			distinguishedName = e.getDistinguishedName();
+			attributeMutant = new LdapAttributesMutant(((LdapEntry) e).mutant.attributeMutant);
+		}
 	}
 
 	public LdapEntryMutant(String dn, Attributes attribs) throws NamingException {

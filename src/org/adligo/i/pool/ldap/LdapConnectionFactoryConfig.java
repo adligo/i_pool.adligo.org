@@ -7,6 +7,8 @@ public class LdapConnectionFactoryConfig {
 	private String initalContextFactory = "com.sun.jndi.ldap.LdapCtxFactory";
 	private String userDn;
 	private String userPassword;
+	private String binaryAttributeNames = "binaryPart";
+	private int defaultChunkSize = 65536;
 	
 	public String getProtocol() {
 		return protocol;
@@ -53,5 +55,17 @@ public class LdapConnectionFactoryConfig {
 	}
 	public void setUserPassword(String userPass) {
 		this.userPassword = userPass;
+	}
+	public String getBinaryAttributeNames() {
+		return binaryAttributeNames;
+	}
+	public void setBinaryAttributeNames(String binaryAttributeNames) {
+		this.binaryAttributeNames = binaryAttributeNames;
+	}
+	public int getDefaultChunkSize() {
+		return defaultChunkSize;
+	}
+	public void setDefaultChunkSize(int defaultChunkSize) {
+		this.defaultChunkSize = defaultChunkSize;
 	}
 }

@@ -9,4 +9,6 @@ public interface I_LdapAttributes {
 	public abstract List<Object> getAttributes(String key);
 
 	public abstract List<String> getAttributeNames();
+
+	public boolean hasAttribute(String key, Object value);
 }

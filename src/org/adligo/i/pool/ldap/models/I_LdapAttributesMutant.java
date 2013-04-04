@@ -12,5 +12,4 @@ public interface I_LdapAttributesMutant extends I_LdapAttributes {
 	public abstract void setAttribute(String key, Object value);
 
 	public abstract void setAttributes(String key, List<Object> value);
-	public boolean hasAttribute(String key, Object value);
 }

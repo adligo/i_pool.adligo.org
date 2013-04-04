@@ -1,8 +1,12 @@
 package org.adligo.i.pool.ldap;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.naming.CommunicationException;
 import javax.naming.Context;
@@ -22,12 +26,15 @@ import org.adligo.i.pool.ldap.models.LdapEntryMutant;
 
 public abstract class LdapConnection extends PooledConnection {
 	private static final Log log = LogFactory.getLog(ReadOnlyLdapConnection.class);
+	public static final String CHUNK_SIZE_KEY =  "org.adligo.i_pool.chunk_size";
 	InitialDirContext ctx;
 	Hashtable<?, ?> initalEnv;
 	private volatile boolean ok = true;
+	private int chunkSize;
 	
 	public LdapConnection(Hashtable<?,?> env) {
 		initalEnv = (Hashtable) env.clone();
+		chunkSize = (Integer) env.get(CHUNK_SIZE_KEY);
 		reconnect();
 	}
 
@@ -154,5 +161,41 @@ public abstract class LdapConnection extends PooledConnection {
 		}
 		return null;
 		
+	}
+
+
+	int getChunkSize() {
+		return chunkSize;
+	}
+
+
+	void setChunkSize(int chunkSize) {
+		this.chunkSize = chunkSize;
+	}
+	
+	/**
+	 * reads the chunked data out to the output stream
+	 * @param name
+	 * @param out
+	 * @throws IOException
+	 */
+	public void readChunkedFile(String name, OutputStream out) throws IOException {
+		markActive();
+		I_LdapEntry chunk = null;
+		 SearchControls controls =
+		            new SearchControls();
+		         controls.setSearchScope(
+		            SearchControls.SUBTREE_SCOPE);
+		List<String> dns = search("", "(objectClass=fileChunk)", controls);
+		
+		for (int chunkNumber = 1; chunkNumber <= dns.size(); chunkNumber++) {
+			chunk = get("chunkNumber=" + chunkNumber + "," + name);
+			if (chunk != null) {
+				byte [] bytes = (byte []) chunk.getAttribute("binaryPart");
+				out.write(bytes);
+				out.flush();
+			}
+		} 
+		out.close();
 	}
 }

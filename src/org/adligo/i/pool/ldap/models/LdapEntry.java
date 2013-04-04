@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class LdapEntry implements I_LdapEntry {
-	private LdapEntryMutant mutant;
+	LdapEntryMutant mutant;
 	
 	public LdapEntry() {
 		mutant = new LdapEntryMutant();

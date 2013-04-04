@@ -17,6 +17,11 @@ public class ReadOnlyLdapConnectionFactory implements I_PooledConnectionFactory<
 	         config.getInitalContextFactory());
 	      env.put(Context.PROVIDER_URL,
 	         config.getUrl());
+	      String binAttributeNames = config.getBinaryAttributeNames();
+		  if (binAttributeNames != null) {
+			  env.put("java.naming.ldap.attributes.binary", binAttributeNames);
+		  }
+		  env.put(LdapConnection.CHUNK_SIZE_KEY, config.getDefaultChunkSize());
 	}
 
 	@Override

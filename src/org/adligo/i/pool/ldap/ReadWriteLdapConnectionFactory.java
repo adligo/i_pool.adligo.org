@@ -20,6 +20,11 @@ public class ReadWriteLdapConnectionFactory implements I_PooledConnectionFactory
 	      env.put(Context.SECURITY_AUTHENTICATION, "simple");
 		  env.put(Context.SECURITY_PRINCIPAL, config.getUserDn());
 		  env.put(Context.SECURITY_CREDENTIALS, config.getUserPassword());
+		  String binAttributeNames = config.getBinaryAttributeNames();
+		  if (binAttributeNames != null) {
+			  env.put("java.naming.ldap.attributes.binary", binAttributeNames);
+		  }
+		  env.put(LdapConnection.CHUNK_SIZE_KEY, config.getDefaultChunkSize());
 	}
 
 	@Override
