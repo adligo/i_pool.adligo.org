@@ -1,6 +1,9 @@
 package org.adligo.i.pool.ldap.models;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +73,7 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 		return (List<Object>) toRet;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		Set<Entry<String, Object>> entries = attribs.entrySet();
@@ -99,6 +103,7 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 		return new ArrayList<String>(attribs.keySet());
 	}
 	
+	@SuppressWarnings("unchecked")
 	public boolean hasAttribute(String key, Object value) {
 		if (value == null) {
 			return false;
@@ -135,6 +140,7 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 		return (Integer) toRet;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Integer> getIntegerAttributes(String key) {
 		Object toRet = attribs.get(key);
@@ -146,6 +152,181 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 		for (Object obj: toRetList) {
 			//add one at a time to make sure we cast correctly
 			list.add((Integer) obj);
+		}
+		return list;
+	}
+
+	@Override
+	public Short getShortAttribute(String key) {
+		Object toRet = attribs.get(key);
+		if (toRet == null) {
+			return null;
+		}
+		return (Short) toRet;
+	}
+
+	@Override
+	public Float getFloatAttribute(String key) {
+		Object toRet = attribs.get(key);
+		if (toRet == null) {
+			return null;
+		}
+		return (Float) toRet;
+	}
+
+	@Override
+	public Double getDoubleAttribute(String key) {
+		Object toRet = attribs.get(key);
+		if (toRet == null) {
+			return null;
+		}
+		return (Double) toRet;
+	}
+
+	@Override
+	public BigInteger getBigIntegerAttribute(String key) {
+		Object toRet = attribs.get(key);
+		if (toRet == null) {
+			return null;
+		}
+		return (BigInteger) toRet;
+	}
+
+	@Override
+	public BigDecimal getBigDecimalAttribute(String key) {
+		Object toRet = attribs.get(key);
+		if (toRet == null) {
+			return null;
+		}
+		return (BigDecimal) toRet;
+	}
+
+	@Override
+	public Date getDateAttribute(String key) {
+		Object toRet = attribs.get(key);
+		if (toRet == null) {
+			return null;
+		}
+		return (Date) toRet;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Short> getShortAttributes(String key) {
+		Object toRet = attribs.get(key);
+		if (toRet == null) {
+			return null;
+		}
+		List<Short> list = new ArrayList<Short>();
+		List<Object> toRetList = (List<Object>) toRet;
+		for (Object obj: toRetList) {
+			//add one at a time to make sure we cast correctly
+			list.add((Short) obj);
+		}
+		return list;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Float> getFloatAttributes(String key) {
+		Object toRet = attribs.get(key);
+		if (toRet == null) {
+			return null;
+		}
+		List<Float> list = new ArrayList<Float>();
+		List<Object> toRetList = (List<Object>) toRet;
+		for (Object obj: toRetList) {
+			//add one at a time to make sure we cast correctly
+			list.add((Float) obj);
+		}
+		return list;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Double> getDoubleAttributes(String key) {
+		Object toRet = attribs.get(key);
+		if (toRet == null) {
+			return null;
+		}
+		List<Double> list = new ArrayList<Double>();
+		List<Object> toRetList = (List<Object>) toRet;
+		for (Object obj: toRetList) {
+			//add one at a time to make sure we cast correctly
+			list.add((Double) obj);
+		}
+		return list;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<BigInteger> getBigIntegerAttributes(String key) {
+		Object toRet = attribs.get(key);
+		if (toRet == null) {
+			return null;
+		}
+		List<BigInteger> list = new ArrayList<BigInteger>();
+		List<Object> toRetList = (List<Object>) toRet;
+		for (Object obj: toRetList) {
+			//add one at a time to make sure we cast correctly
+			list.add((BigInteger) obj);
+		}
+		return list;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<BigDecimal> getBigDecimalAttributes(String key) {
+		Object toRet = attribs.get(key);
+		if (toRet == null) {
+			return null;
+		}
+		List<BigDecimal> list = new ArrayList<BigDecimal>();
+		List<Object> toRetList = (List<Object>) toRet;
+		for (Object obj: toRetList) {
+			//add one at a time to make sure we cast correctly
+			list.add((BigDecimal) obj);
+		}
+		return list;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Date> getDateAttributes(String key) {
+		Object toRet = attribs.get(key);
+		if (toRet == null) {
+			return null;
+		}
+		List<Date> list = new ArrayList<Date>();
+		List<Object> toRetList = (List<Object>) toRet;
+		for (Object obj: toRetList) {
+			//add one at a time to make sure we cast correctly
+			list.add((Date) obj);
+		}
+		return list;
+	}
+
+	@Override
+	public Long getLongAttribute(String key) {
+		Object toRet = attribs.get(key);
+		if (toRet == null) {
+			return null;
+		}
+		return (Long) toRet;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Long> getLongAttributes(String key) {
+		Object toRet = attribs.get(key);
+		if (toRet == null) {
+			return null;
+		}
+		List<Long> list = new ArrayList<Long>();
+		List<Object> toRetList = (List<Object>) toRet;
+		for (Object obj: toRetList) {
+			//add one at a time to make sure we cast correctly
+			list.add((Long) obj);
 		}
 		return list;
 	}

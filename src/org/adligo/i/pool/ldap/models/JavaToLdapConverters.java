@@ -1,12 +1,9 @@
 package org.adligo.i.pool.ldap.models;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import javax.naming.directory.BasicAttribute;
 
 import org.adligo.i.pool.ldap.models.converters.I_AttributeConverter;
 

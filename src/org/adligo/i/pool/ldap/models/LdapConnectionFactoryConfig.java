@@ -1,14 +1,24 @@
 package org.adligo.i.pool.ldap.models;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.adligo.i.pool.ldap.models.converters.BigDecimalAttributeConverter;
+import org.adligo.i.pool.ldap.models.converters.BigIntegerAttributeConverter;
 import org.adligo.i.pool.ldap.models.converters.BooleanAttributeConverter;
+import org.adligo.i.pool.ldap.models.converters.DateAttributeConverter;
+import org.adligo.i.pool.ldap.models.converters.DoubleAttributeConverter;
+import org.adligo.i.pool.ldap.models.converters.FloatAttributeConverter;
 import org.adligo.i.pool.ldap.models.converters.I_AttributeConverter;
 import org.adligo.i.pool.ldap.models.converters.IntegerAttributeConverter;
+import org.adligo.i.pool.ldap.models.converters.LongAttributeConverter;
+import org.adligo.i.pool.ldap.models.converters.ShortAttributeConverter;
 
 
 /**
@@ -36,6 +46,13 @@ public class LdapConnectionFactoryConfig {
 	public LdapConnectionFactoryConfig() {
 		attributeConverters.put(Integer.class, new IntegerAttributeConverter());
 		attributeConverters.put(Boolean.class, new BooleanAttributeConverter());
+		attributeConverters.put(Short.class, new ShortAttributeConverter());
+		attributeConverters.put(Float.class, new FloatAttributeConverter());
+		attributeConverters.put(Double.class, new DoubleAttributeConverter());
+		attributeConverters.put(BigInteger.class, new BigIntegerAttributeConverter());
+		attributeConverters.put(BigDecimal.class, new BigDecimalAttributeConverter());
+		attributeConverters.put(Long.class, new LongAttributeConverter());
+		attributeConverters.put(Date.class, new DateAttributeConverter());
 	}
 	
 	public String getProtocol() {

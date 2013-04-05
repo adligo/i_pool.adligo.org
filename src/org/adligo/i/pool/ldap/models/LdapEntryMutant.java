@@ -1,6 +1,9 @@
 package org.adligo.i.pool.ldap.models;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.naming.NamingEnumeration;
@@ -99,6 +102,62 @@ public class LdapEntryMutant implements I_LdapEntry {
 
 	public List<Integer> getIntegerAttributes(String key) {
 		return attributeMutant.getIntegerAttributes(key);
+	}
+
+	public Short getShortAttribute(String key) {
+		return attributeMutant.getShortAttribute(key);
+	}
+
+	public Float getFloatAttribute(String key) {
+		return attributeMutant.getFloatAttribute(key);
+	}
+
+	public Double getDoubleAttribute(String key) {
+		return attributeMutant.getDoubleAttribute(key);
+	}
+
+	public BigInteger getBigIntegerAttribute(String key) {
+		return attributeMutant.getBigIntegerAttribute(key);
+	}
+
+	public BigDecimal getBigDecimalAttribute(String key) {
+		return attributeMutant.getBigDecimalAttribute(key);
+	}
+
+	public Date getDateAttribute(String key) {
+		return attributeMutant.getDateAttribute(key);
+	}
+
+	public List<Short> getShortAttributes(String key) {
+		return attributeMutant.getShortAttributes(key);
+	}
+
+	public List<Float> getFloatAttributes(String key) {
+		return attributeMutant.getFloatAttributes(key);
+	}
+
+	public List<Double> getDoubleAttributes(String key) {
+		return attributeMutant.getDoubleAttributes(key);
+	}
+
+	public List<BigInteger> getBigIntegerAttributes(String key) {
+		return attributeMutant.getBigIntegerAttributes(key);
+	}
+
+	public List<BigDecimal> getBigDecimalAttributes(String key) {
+		return attributeMutant.getBigDecimalAttributes(key);
+	}
+
+	public List<Date> getDateAttributes(String key) {
+		return attributeMutant.getDateAttributes(key);
+	}
+
+	public Long getLongAttribute(String key) {
+		return attributeMutant.getLongAttribute(key);
+	}
+
+	public List<Long> getLongAttributes(String key) {
+		return attributeMutant.getLongAttributes(key);
 	}
 	
 }
