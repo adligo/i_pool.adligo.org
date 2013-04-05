@@ -16,16 +16,23 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
+import org.adligo.i.adi.client.InvokerNames;
+import org.adligo.i.adig.client.GRegistry;
+import org.adligo.i.adig.client.I_GInvoker;
 import org.adligo.i.log.client.Log;
 import org.adligo.i.log.client.LogFactory;
 import org.adligo.i.pool.PooledConnection;
 import org.adligo.i.pool.ldap.models.I_LdapEntry;
 import org.adligo.i.pool.ldap.models.JavaToLdapConverters;
+import org.adligo.i.pool.ldap.models.LargeFileAttributes;
 import org.adligo.i.pool.ldap.models.LdapEntry;
 import org.adligo.i.pool.ldap.models.LdapEntryMutant;
 
 public abstract class LdapConnection extends PooledConnection {
+	public static final String IS_CURRENTLY_BEING_DELETED_SO_IT_CAN_NOT_BE_READ = " is currently being deleted so it can NOT be read.";
+	public static final String THE_FILE = "The file ";
 	private static final Log log = LogFactory.getLog(ReadOnlyLdapConnection.class);
+	
 	public static final String CHUNK_SIZE_KEY =  "org.adligo.i_pool.chunk_size";
 	InitialDirContext ctx;
 	Hashtable<?, ?> initalEnv;
@@ -187,29 +194,5 @@ public abstract class LdapConnection extends PooledConnection {
 		this.chunkSize = chunkSize;
 	}
 	
-	/**
-	 * reads the chunked data out to the output stream
-	 * @param name
-	 * @param out
-	 * @throws IOException
-	 */
-	public void readChunkedFile(String name, OutputStream out) throws IOException {
-		markActive();
-		I_LdapEntry chunk = null;
-		 SearchControls controls =
-		            new SearchControls();
-		         controls.setSearchScope(
-		            SearchControls.SUBTREE_SCOPE);
-		List<String> dns = search("", "(objectClass=fileChunk)", controls);
-		
-		for (int chunkNumber = 1; chunkNumber <= dns.size(); chunkNumber++) {
-			chunk = get("chunkNumber=" + chunkNumber + "," + name);
-			if (chunk != null) {
-				byte [] bytes = (byte []) chunk.getAttribute("binaryPart");
-				out.write(bytes);
-				out.flush();
-			}
-		} 
-		out.close();
-	}
+	
 }

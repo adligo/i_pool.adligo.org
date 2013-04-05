@@ -2,6 +2,7 @@ package org.adligo.i.pool.ldap;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
@@ -12,17 +13,26 @@ import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.BasicAttributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
+import javax.naming.directory.SearchControls;
 
+import org.adligo.i.adi.client.InvokerNames;
+import org.adligo.i.adig.client.GRegistry;
+import org.adligo.i.adig.client.I_GInvoker;
 import org.adligo.i.log.client.Log;
 import org.adligo.i.log.client.LogFactory;
 import org.adligo.i.pool.ldap.models.I_LdapEntry;
 import org.adligo.i.pool.ldap.models.JavaToLdapConverters;
+import org.adligo.i.pool.ldap.models.LargeFileAttributes;
+import org.adligo.i.pool.ldap.models.LargeFileChunkAttributes;
 import org.adligo.i.pool.ldap.models.LdapEntryMutant;
 
 
 public class ReadWriteLdapConnection extends LdapConnection {
+	public static final String IS_CURRENTLY_BEING_READ_SO_IT_CAN_T_BE_DELETED_RIGHT_NOW = " is currently being read, so it can't be deleted right now.";
 	private static final Log log = LogFactory.getLog(ReadWriteLdapConnection.class);
-	private static List<String> dEFAULT_IGNORE_ATTRIBUTE_LIST = getDefaultIgnoreAttributeList();
+	private static List<String> DEFAULT_IGNORE_ATTRIBUTE_LIST = getDefaultIgnoreAttributeList();
+	private static I_GInvoker<Object, Long> CLOCK = GRegistry.getInvoker(InvokerNames.CLOCK, 
+			Object.class, Long.class);
 	
 	private static List<String> getDefaultIgnoreAttributeList() {
 		List<String> ignore = new ArrayList<String>();
@@ -146,7 +156,7 @@ public class ReadWriteLdapConnection extends LdapConnection {
 	}
 	
 	public boolean update(I_LdapEntry e) {
-		return update(e, dEFAULT_IGNORE_ATTRIBUTE_LIST);
+		return update(e, DEFAULT_IGNORE_ATTRIBUTE_LIST);
 	}
 	/**
 	 * only useful for single attributes like password
@@ -177,24 +187,35 @@ public class ReadWriteLdapConnection extends LdapConnection {
 	}
 	
 	/**
-	 * writes the chunked file out as ldap entries
-	 * and closes the stream
+	 * puts the large file in the ldap server as a group of entries;
+	 * largeFile
+	 *    largeFileChunk nbr 1
+	 *    largeFileChunk nbr 2
+	 *    exc;
+	 *    
+	 * This does NOT close the InputStream;
 	 * 
 	 * @param fileName
 	 * @param baseDn
 	 * @param size
 	 * @param contentStream
 	 * @return
-	 * @throws IOException
+	 * @throws IOException should be caught, logged
+	 *    and the file deleted as it was not a complete write
+	 *    and then try it again?
 	 */
-	public boolean writeChunkedFile(String fileName, String baseDn, long size, InputStream contentStream) throws IOException {
+	public boolean createLargeFile(String fileName, String baseDn, long size, InputStream contentStream) throws IOException {
 		markActive();
 		
 		LdapEntryMutant mut = new LdapEntryMutant();
-	     mut.setAttribute("fileName", fileName);
-	     mut.setDistinguishedName("fileName=" + fileName + "," + baseDn);
-	      mut.setAttribute("size", "" + size);
-	     mut.setAttribute("objectClass", "chunkedFile");
+	    
+	     mut.setDistinguishedName(LargeFileAttributes.FN + "=" + fileName + "," + baseDn);
+	     mut.setAttribute(LargeFileAttributes.FN, fileName);
+	     mut.setAttribute(LargeFileAttributes.SIZE, size);
+	     mut.setAttribute(LargeFileAttributes.WT, true);
+	     mut.setAttribute(LargeFileAttributes.RD, 0L);
+	     mut.setAttribute(LargeFileAttributes.DEL, false);
+	     mut.setAttribute(LargeFileAttributes.OBJECT_CLASS, LargeFileAttributes.LF);
 	     
 		if (!create(mut)) {
 			return false;
@@ -208,11 +229,11 @@ public class ReadWriteLdapConnection extends LdapConnection {
 			contentStream.read(bytes);
 			
 			LdapEntryMutant lem = new LdapEntryMutant();
-			lem.setDistinguishedName("chunkNumber=" + whichChunk + "," + fileDn);
-			lem.setAttribute("objectClass", "fileChunk");
-			lem.setAttribute("chunkNumber", "" + whichChunk);
-			lem.setAttribute("size", "" +  chunkSize);
-			lem.setAttribute("binaryPart", bytes);
+			lem.setDistinguishedName(LargeFileChunkAttributes.NBR + "=" + whichChunk + "," + fileDn);
+			lem.setAttribute(LargeFileChunkAttributes.OBJECT_CLASS, LargeFileChunkAttributes.LFC);
+			lem.setAttribute(LargeFileChunkAttributes.NBR, whichChunk);
+			lem.setAttribute(LargeFileChunkAttributes.SIZE, (long) chunkSize);
+			lem.setAttribute(LargeFileChunkAttributes.BN, bytes);
 			if (!create(lem)) {
 				return false;
 			}
@@ -223,15 +244,102 @@ public class ReadWriteLdapConnection extends LdapConnection {
 		contentStream.read(bytes);
 		
 		LdapEntryMutant lem = new LdapEntryMutant();
-		lem.setDistinguishedName("chunkNumber=" + whichChunk + "," + fileDn);
-		lem.setAttribute("objectClass", "fileChunk");
-		lem.setAttribute("chunkNumber", "" + whichChunk);
-		lem.setAttribute("size", "" + size);
-		lem.setAttribute("binaryPart", bytes);
+		lem.setDistinguishedName(LargeFileChunkAttributes.NBR + "=" + whichChunk + "," + fileDn);
+		lem.setAttribute(LargeFileChunkAttributes.OBJECT_CLASS, LargeFileChunkAttributes.LFC);
+		lem.setAttribute(LargeFileChunkAttributes.NBR, whichChunk);
+		lem.setAttribute(LargeFileChunkAttributes.SIZE, size);
+		lem.setAttribute(LargeFileChunkAttributes.BN, bytes);
 		if (!create(lem)) {
 			return false;
 		}
-		contentStream.close();
+		replaceAttribute(fileDn, LargeFileAttributes.WRITING, false);
 		return true;
+	}
+	
+	/**
+	 * reads the large file data out to the output stream
+	 * note this is in the ReadWriteLdapConnection
+	 * because it writes the last time a read of file started
+	 * this does not close the OutputStream
+	 * 
+	 * @param name
+	 * @param out
+	 * @throws IOException this indicates a problem writing the output through the OutputStream
+	 * 
+	 */
+	public void getLargeFile(String name, OutputStream out) throws IOException {
+		markActive();
+		I_LdapEntry largeFile = get(name);
+		if (largeFile == null) {
+			throw new IllegalStateException("no file found for " + name);
+		}
+		Boolean deleting = largeFile.getBooleanAttribute(LargeFileAttributes.DEL);
+		if (deleting == null) {
+			 deleting = largeFile.getBooleanAttribute(LargeFileAttributes.DELETING);
+		}
+		if (deleting) {
+			throw new IllegalStateException(THE_FILE + name + 
+					IS_CURRENTLY_BEING_DELETED_SO_IT_CAN_NOT_BE_READ);
+		}
+		Long time = CLOCK.invoke(null);
+		replaceAttribute(name, LargeFileAttributes.RD, time);
+		I_LdapEntry chunk = null;
+		 SearchControls controls =
+		            new SearchControls();
+		         controls.setSearchScope(
+		            SearchControls.SUBTREE_SCOPE);
+		
+		List<String> dns = search("", "(objectClass=" + LargeFileChunkAttributes.LFC + ")", controls);
+		
+		for (int chunkNumber = 1; chunkNumber <= dns.size(); chunkNumber++) {
+			chunk = get(LargeFileChunkAttributes.NBR +  "=" + chunkNumber + "," + name);
+			if (chunk == null) {
+				chunk = get(LargeFileChunkAttributes.SEQUENCED_NUMBER +  "=" + chunkNumber + "," + name);
+			}
+			if (chunk != null) {
+				byte [] bytes = (byte []) chunk.getAttribute(LargeFileChunkAttributes.BN);
+				if (bytes == null) {
+					bytes = (byte []) chunk.getAttribute(LargeFileChunkAttributes.BINARY);
+				}
+				out.write(bytes);
+				out.flush();
+			}
+		} 
+	}
+	
+	/**
+	 * reads the large file data out to the output stream
+	 * note this is in the ReadWriteLdapConnection
+	 * because it writes the last time a read of file started
+	 * this does not close the OutputStream
+	 * 
+	 * @param name
+	 * @param out
+	 * @throws IOException this indicates a problem writing the output through the OutputStream
+	 * 
+	 */
+	public boolean deleteLargeFile(String name) throws IOException {
+		markActive();
+		I_LdapEntry largeFile = get(name);
+		if (largeFile == null) {
+			//someone else deleted it?
+			return true;
+		}
+		replaceAttribute(name, LargeFileAttributes.DEL, true);
+		 SearchControls controls =
+		            new SearchControls();
+		         controls.setSearchScope(
+		            SearchControls.SUBTREE_SCOPE);
+		List<String> dns = search("", "(objectClass=" + LargeFileChunkAttributes.LFC + ")", controls);
+		
+		for (int chunkNumber = 1; chunkNumber <= dns.size(); chunkNumber++) {
+			if (!delete(LargeFileChunkAttributes.NBR +  "=" + chunkNumber + "," + name)) {
+				return false;
+			}
+		} 
+		if (delete(name)) {
+			return true;
+		}
+		return false;
 	}
 }

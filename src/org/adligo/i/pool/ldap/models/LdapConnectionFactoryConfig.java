@@ -35,7 +35,7 @@ public class LdapConnectionFactoryConfig {
 	private String initalContextFactory = "com.sun.jndi.ldap.LdapCtxFactory";
 	private String userDn;
 	private String userPassword;
-	private String binaryAttributeNames = "binaryPart";
+	private String binaryAttributeNames = "bn binary";
 	private int defaultChunkSize = 65536;
 	/**
 	 * the key is a Java class, the value is a list of ldap attribute names
@@ -53,6 +53,20 @@ public class LdapConnectionFactoryConfig {
 		attributeConverters.put(BigDecimal.class, new BigDecimalAttributeConverter());
 		attributeConverters.put(Long.class, new LongAttributeConverter());
 		attributeConverters.put(Date.class, new DateAttributeConverter());
+		
+		addConvertedAttribute(Long.class, "size");
+
+		addConvertedAttribute(Boolean.class, "wt");
+		addConvertedAttribute(Boolean.class, "writing");
+		
+		addConvertedAttribute(Boolean.class, "del");
+		addConvertedAttribute(Boolean.class, "deleting");
+		
+		addConvertedAttribute(Integer.class, "nbr");
+		addConvertedAttribute(Integer.class, "sequencedNumber");
+		
+		addConvertedAttribute(Long.class, "rd");
+		addConvertedAttribute(Long.class, "reading");
 	}
 	
 	public String getProtocol() {

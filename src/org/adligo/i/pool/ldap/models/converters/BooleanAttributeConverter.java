@@ -23,7 +23,7 @@ public class BooleanAttributeConverter implements I_AttributeConverter<Boolean, 
 		if (p.equalsIgnoreCase("True")) {
 			return true;
 		}
-		return true;
+		return false;
 	}
 
 	@Override

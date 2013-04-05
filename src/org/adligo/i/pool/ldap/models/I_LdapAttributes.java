@@ -31,5 +31,6 @@ public interface I_LdapAttributes {
 	
 	public abstract List<String> getAttributeNames();
 
+	public boolean hasAttribute(String key);
 	public boolean hasAttribute(String key, Object value);
 }

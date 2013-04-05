@@ -108,4 +108,8 @@ public class LdapEntry implements I_LdapEntry {
 	public List<Long> getLongAttributes(String key) {
 		return mutant.getLongAttributes(key);
 	}
+
+	public boolean hasAttribute(String key) {
+		return mutant.hasAttribute(key);
+	}
 }

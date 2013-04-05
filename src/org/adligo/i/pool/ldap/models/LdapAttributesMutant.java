@@ -330,4 +330,9 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 		}
 		return list;
 	}
+
+	@Override
+	public boolean hasAttribute(String key) {
+		return attribs.containsKey(key);
+	}
 }
