@@ -7,6 +7,8 @@
 # provides a set of classes and attributes for writing large files to ldap server
 # in a way that works good with InputStream and OutputStream (or did you want your 2Gb file in RAM?)
 # 
+# NOTE the OIDs will change when IANA gives me another number. 
+#
 dn: cn=schema
 objectClass: top
 objectClass: ldapSubentry
