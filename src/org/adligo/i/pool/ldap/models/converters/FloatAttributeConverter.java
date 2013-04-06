@@ -1,5 +1,7 @@
 package org.adligo.i.pool.ldap.models.converters;
 
+import java.math.BigDecimal;
+
 import org.adligo.i.util.client.StringUtils;
 
 public class FloatAttributeConverter implements I_AttributeConverter<Float, String>{
@@ -9,7 +11,7 @@ public class FloatAttributeConverter implements I_AttributeConverter<Float, Stri
 		if (p == null) {
 			return "";
 		}
-		return "" + p;
+		return new BigDecimal(p).toPlainString();
 	}
 
 	@Override
