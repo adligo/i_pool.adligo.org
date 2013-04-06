@@ -54,19 +54,22 @@ public class LdapConnectionFactoryConfig {
 		attributeConverters.put(Long.class, new LongAttributeConverter());
 		attributeConverters.put(Date.class, new DateAttributeConverter());
 		
-		addConvertedAttribute(Long.class, "size");
+		addConvertedAttribute(Long.class, LargeFileAttributes.SIZE);
 
-		addConvertedAttribute(Boolean.class, "wt");
-		addConvertedAttribute(Boolean.class, "writing");
+		addConvertedAttribute(Boolean.class, LargeFileAttributes.WT);
+		addConvertedAttribute(Boolean.class, LargeFileAttributes.WRITING);
 		
-		addConvertedAttribute(Boolean.class, "del");
-		addConvertedAttribute(Boolean.class, "deleting");
+		addConvertedAttribute(Boolean.class, LargeFileAttributes.DEL);
+		addConvertedAttribute(Boolean.class, LargeFileAttributes.DELETING);
 		
-		addConvertedAttribute(Integer.class, "nbr");
-		addConvertedAttribute(Integer.class, "sequencedNumber");
+		addConvertedAttribute(Boolean.class, LargeFileAttributes.CK);
+		addConvertedAttribute(Boolean.class, LargeFileAttributes.CHECKED);
 		
-		addConvertedAttribute(Long.class, "rd");
-		addConvertedAttribute(Long.class, "reading");
+		addConvertedAttribute(Integer.class, LargeFileChunkAttributes.NBR);
+		addConvertedAttribute(Integer.class, LargeFileChunkAttributes.SEQUENCED_NUMBER);
+		
+		addConvertedAttribute(Long.class, LargeFileAttributes.RD);
+		addConvertedAttribute(Long.class, LargeFileAttributes.READING);
 	}
 	
 	public String getProtocol() {

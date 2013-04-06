@@ -215,6 +215,7 @@ public class ReadWriteLdapConnection extends LdapConnection {
 	     mut.setAttribute(LargeFileAttributes.WT, true);
 	     mut.setAttribute(LargeFileAttributes.RD, 0L);
 	     mut.setAttribute(LargeFileAttributes.DEL, false);
+	     mut.setAttribute(LargeFileAttributes.CK, false);
 	     mut.setAttribute(LargeFileAttributes.OBJECT_CLASS, LargeFileAttributes.LF);
 	     
 		if (!create(mut)) {
@@ -253,6 +254,7 @@ public class ReadWriteLdapConnection extends LdapConnection {
 			return false;
 		}
 		replaceAttribute(fileDn, LargeFileAttributes.WRITING, false);
+
 		return true;
 	}
 	

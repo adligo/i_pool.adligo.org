@@ -48,8 +48,10 @@ public class Pool<T extends PooledConnection> {
 	
 	@SuppressWarnings("unchecked")
 	void returnConnection(I_PooledConnection p) {
-		availableConnections.add((T) p);
-		activeConnections.remove(p);
+		if (!availableConnections.contains(p)) {
+			availableConnections.add((T) p);
+			activeConnections.remove(p);
+		}
 	}
 	
 	public T getConnection() {
