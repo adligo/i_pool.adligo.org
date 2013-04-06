@@ -112,4 +112,8 @@ public class LdapEntry implements I_LdapEntry {
 	public boolean hasAttribute(String key) {
 		return mutant.hasAttribute(key);
 	}
+
+	public List<String> getStringAttributes(String key) {
+		return mutant.getStringAttributes(key);
+	}
 }

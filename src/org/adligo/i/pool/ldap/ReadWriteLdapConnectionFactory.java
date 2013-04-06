@@ -21,8 +21,14 @@ public class ReadWriteLdapConnectionFactory implements I_PooledConnectionFactory
 	      env.put(Context.PROVIDER_URL,
 	         config.getUrl());
 	      env.put(Context.SECURITY_AUTHENTICATION, "simple");
-		  env.put(Context.SECURITY_PRINCIPAL, config.getUserDn());
-		  env.put(Context.SECURITY_CREDENTIALS, config.getUserPassword());
+	      String userDn = config.getUserDn();
+	      if (userDn != null) {
+	    	  env.put(Context.SECURITY_PRINCIPAL, userDn);
+	      }
+	      String passwd = config.getUserPassword();
+	      if (passwd != null) {
+	    	  env.put(Context.SECURITY_CREDENTIALS, passwd);
+	      }
 		  String binAttributeNames = config.getBinaryAttributeNames();
 		  if (binAttributeNames != null) {
 			  env.put("java.naming.ldap.attributes.binary", binAttributeNames);

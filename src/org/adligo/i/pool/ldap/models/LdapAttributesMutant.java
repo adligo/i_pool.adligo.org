@@ -201,6 +201,7 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 		return (BigDecimal) toRet;
 	}
 
+	
 	@Override
 	public Date getDateAttribute(String key) {
 		Object toRet = attribs.get(key);
@@ -331,6 +332,22 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 		return list;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<String> getStringAttributes(String key) {
+		Object toRet = attribs.get(key);
+		if (toRet == null) {
+			return null;
+		}
+		List<String> list = new ArrayList<String>();
+		List<Object> toRetList = (List<Object>) toRet;
+		for (Object obj: toRetList) {
+			//add one at a time to make sure we cast correctly
+			list.add((String) obj);
+		}
+		return list;
+	}
+	
 	@Override
 	public boolean hasAttribute(String key) {
 		return attribs.containsKey(key);
