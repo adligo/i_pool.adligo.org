@@ -212,8 +212,8 @@ public abstract class LdapConnection extends PooledConnection {
 		if (largeFile == null) {
 			throw new IllegalStateException("no file found for " + name);
 		}
-		Boolean deleting = largeFile.getBooleanAttribute(LargeFileAttributes.DELETING);
-		if (deleting) {
+		Long deleting = largeFile.getLongAttribute(LargeFileAttributes.DELETING);
+		if (deleting != null) {
 			throw new IllegalStateException(THE_FILE + name + 
 					IS_CURRENTLY_BEING_DELETED_SO_IT_CAN_NOT_BE_READ);
 		}

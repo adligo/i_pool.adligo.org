@@ -16,5 +16,5 @@ public interface I_LdapAttributesMutant extends I_LdapAttributes {
 	 * @param name
 	 * @param value
 	 */
-	public abstract void setAttributes(I_LdapAttribute name, List<Object> value);
+	public abstract void setAttributes(I_LdapAttribute name, List<? extends Object> value);
 }

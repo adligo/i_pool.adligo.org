@@ -38,7 +38,7 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	 * @see org.adligo.i.ldap.I_LdapAttributesMutant#setAttributes(org.adligo.i.pool.ldap.models.I_LdapAttributeName, java.util.List)
 	 */
 	@Override
-	public void setAttributes(I_LdapAttribute name, List<Object> value) {
+	public void setAttributes(I_LdapAttribute name, List<? extends Object> value) {
 		attribs.put(name, new ArrayList<Object>(value));
 	}
 	
@@ -61,16 +61,19 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Object> getAttributes(I_LdapAttribute key){
-		Object toRet = attribs.get(key);
-		if (toRet == null) {
+		List<Object> toRet = new ArrayList<Object>();
+		Object val = attribs.get(key);
+		if (val == null) {
 			return new ArrayList<Object>();
+		} if (val instanceof ArrayList) {
+			List<Object> toRetList = (List<Object>) val;
+			for (Object obj: toRetList) {
+				toRet.add(obj);
+			}
+		} else {
+			toRet.add(val);
 		}
-		if ( !(toRet instanceof ArrayList)) {
-			ArrayList<Object> list = new ArrayList<Object>();
-			list.add(toRet);
-			toRet = list;
-		}
-		return (List<Object>) toRet;
+		return toRet;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -145,17 +148,20 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Integer> getIntegerAttributes(I_LdapAttribute key) {
-		Object toRet = attribs.get(key);
-		if (toRet == null) {
+		List<Integer> toRet = new ArrayList<Integer>();
+		Object val = attribs.get(key);
+		if (val == null) {
 			return new ArrayList<Integer>();
+		} if (val instanceof Integer) {
+			toRet.add((Integer) val);
+		} else {
+			List<Object> toRetList = (List<Object>) val;
+			for (Object obj: toRetList) {
+				//add one at a time to make sure we cast correctly
+				toRet.add((Integer) obj);
+			}
 		}
-		List<Integer> list = new ArrayList<Integer>();
-		List<Object> toRetList = (List<Object>) toRet;
-		for (Object obj: toRetList) {
-			//add one at a time to make sure we cast correctly
-			list.add((Integer) obj);
-		}
-		return list;
+		return toRet;
 	}
 
 	@Override
@@ -216,97 +222,115 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Short> getShortAttributes(I_LdapAttribute key) {
-		Object toRet = attribs.get(key);
-		if (toRet == null) {
+		List<Short> toRet = new ArrayList<Short>();
+		Object val = attribs.get(key);
+		if (val == null) {
 			return new ArrayList<Short>();
+		} if (val instanceof Short) {
+			toRet.add((Short) val);
+		} else {
+			List<Object> toRetList = (List<Object>) val;
+			for (Object obj: toRetList) {
+				//add one at a time to make sure we cast correctly
+				toRet.add((Short) obj);
+			}
 		}
-		List<Short> list = new ArrayList<Short>();
-		List<Object> toRetList = (List<Object>) toRet;
-		for (Object obj: toRetList) {
-			//add one at a time to make sure we cast correctly
-			list.add((Short) obj);
-		}
-		return list;
+		return toRet;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Float> getFloatAttributes(I_LdapAttribute key) {
-		Object toRet = attribs.get(key);
-		if (toRet == null) {
+		List<Float> toRet = new ArrayList<Float>();
+		Object val = attribs.get(key);
+		if (val == null) {
 			return new ArrayList<Float>();
+		} if (val instanceof Float) {
+			toRet.add((Float) val);
+		} else {
+			List<Object> toRetList = (List<Object>) val;
+			for (Object obj: toRetList) {
+				//add one at a time to make sure we cast correctly
+				toRet.add((Float) obj);
+			}
 		}
-		List<Float> list = new ArrayList<Float>();
-		List<Object> toRetList = (List<Object>) toRet;
-		for (Object obj: toRetList) {
-			//add one at a time to make sure we cast correctly
-			list.add((Float) obj);
-		}
-		return list;
+		return toRet;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Double> getDoubleAttributes(I_LdapAttribute key) {
-		Object toRet = attribs.get(key);
-		if (toRet == null) {
+		List<Double> toRet = new ArrayList<Double>();
+		Object val = attribs.get(key);
+		if (val == null) {
 			return new ArrayList<Double>();
+		} if (val instanceof Double) {
+			toRet.add((Double) val);
+		} else {
+			List<Object> toRetList = (List<Object>) val;
+			for (Object obj: toRetList) {
+				//add one at a time to make sure we cast correctly
+				toRet.add((Double) obj);
+			}
 		}
-		List<Double> list = new ArrayList<Double>();
-		List<Object> toRetList = (List<Object>) toRet;
-		for (Object obj: toRetList) {
-			//add one at a time to make sure we cast correctly
-			list.add((Double) obj);
-		}
-		return list;
+		return toRet;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<BigInteger> getBigIntegerAttributes(I_LdapAttribute key) {
-		Object toRet = attribs.get(key);
-		if (toRet == null) {
+		List<BigInteger> toRet = new ArrayList<BigInteger>();
+		Object val = attribs.get(key);
+		if (val == null) {
 			return new ArrayList<BigInteger>();
+		} if (val instanceof BigInteger) {
+			toRet.add((BigInteger) val);
+		} else {
+			List<Object> toRetList = (List<Object>) val;
+			for (Object obj: toRetList) {
+				//add one at a time to make sure we cast correctly
+				toRet.add((BigInteger) obj);
+			}
 		}
-		List<BigInteger> list = new ArrayList<BigInteger>();
-		List<Object> toRetList = (List<Object>) toRet;
-		for (Object obj: toRetList) {
-			//add one at a time to make sure we cast correctly
-			list.add((BigInteger) obj);
-		}
-		return list;
+		return toRet;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<BigDecimal> getBigDecimalAttributes(I_LdapAttribute key) {
-		Object toRet = attribs.get(key);
-		if (toRet == null) {
+		List<BigDecimal> toRet = new ArrayList<BigDecimal>();
+		Object val = attribs.get(key);
+		if (val == null) {
 			return new ArrayList<BigDecimal>();
+		} if (val instanceof BigDecimal) {
+			toRet.add((BigDecimal) val);
+		} else {
+			List<Object> toRetList = (List<Object>) val;
+			for (Object obj: toRetList) {
+				//add one at a time to make sure we cast correctly
+				toRet.add((BigDecimal) obj);
+			}
 		}
-		List<BigDecimal> list = new ArrayList<BigDecimal>();
-		List<Object> toRetList = (List<Object>) toRet;
-		for (Object obj: toRetList) {
-			//add one at a time to make sure we cast correctly
-			list.add((BigDecimal) obj);
-		}
-		return list;
+		return toRet;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Date> getDateAttributes(I_LdapAttribute key) {
-		Object toRet = attribs.get(key);
-		if (toRet == null) {
+		List<Date> toRet = new ArrayList<Date>();
+		Object val = attribs.get(key);
+		if (val == null) {
 			return new ArrayList<Date>();
+		} if (val instanceof Date) {
+			toRet.add((Date) val);
+		} else {
+			List<Object> toRetList = (List<Object>) val;
+			for (Object obj: toRetList) {
+				//add one at a time to make sure we cast correctly
+				toRet.add((Date) obj);
+			}
 		}
-		List<Date> list = new ArrayList<Date>();
-		List<Object> toRetList = (List<Object>) toRet;
-		for (Object obj: toRetList) {
-			//add one at a time to make sure we cast correctly
-			list.add((Date) obj);
-		}
-		return list;
+		return toRet;
 	}
 
 	@Override
@@ -321,33 +345,39 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Long> getLongAttributes(I_LdapAttribute key) {
-		Object toRet = attribs.get(key);
-		if (toRet == null) {
+		List<Long> toRet = new ArrayList<Long>();
+		Object val = attribs.get(key);
+		if (val == null) {
 			return new ArrayList<Long>();
+		} if (val instanceof Long) {
+			toRet.add((Long) val);
+		} else {
+			List<Object> toRetList = (List<Object>) val;
+			for (Object obj: toRetList) {
+				//add one at a time to make sure we cast correctly
+				toRet.add((Long) obj);
+			}
 		}
-		List<Long> list = new ArrayList<Long>();
-		List<Object> toRetList = (List<Object>) toRet;
-		for (Object obj: toRetList) {
-			//add one at a time to make sure we cast correctly
-			list.add((Long) obj);
-		}
-		return list;
+		return toRet;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> getStringAttributes(I_LdapAttribute key) {
-		Object toRet = attribs.get(key);
-		if (toRet == null) {
+		List<String> toRet = new ArrayList<String>();
+		Object val = attribs.get(key);
+		if (val == null) {
 			return new ArrayList<String>();
+		} if (val instanceof String) {
+			toRet.add((String) val);
+		} else {
+			List<Object> toRetList = (List<Object>) val;
+			for (Object obj: toRetList) {
+				//add one at a time to make sure we cast correctly
+				toRet.add((String) obj);
+			}
 		}
-		List<String> list = new ArrayList<String>();
-		List<Object> toRetList = (List<Object>) toRet;
-		for (Object obj: toRetList) {
-			//add one at a time to make sure we cast correctly
-			list.add((String) obj);
-		}
-		return list;
+		return toRet;
 	}
 	
 	@Override
