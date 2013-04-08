@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,19 +57,12 @@ public class LdapConnectionFactoryConfig {
 		
 		addConvertedAttribute(Long.class, LargeFileAttributes.SIZE);
 
-		addConvertedAttribute(Boolean.class, LargeFileAttributes.WT);
 		addConvertedAttribute(Boolean.class, LargeFileAttributes.WRITING);
 		
-		addConvertedAttribute(Boolean.class, LargeFileAttributes.DEL);
 		addConvertedAttribute(Boolean.class, LargeFileAttributes.DELETING);
 		
-		addConvertedAttribute(Boolean.class, LargeFileAttributes.CK);
-		addConvertedAttribute(Boolean.class, LargeFileAttributes.CHECKED);
-		
-		addConvertedAttribute(Integer.class, LargeFileChunkAttributes.NBR);
 		addConvertedAttribute(Integer.class, LargeFileChunkAttributes.SEQUENCED_NUMBER);
 		
-		addConvertedAttribute(Long.class, LargeFileAttributes.RD);
 		addConvertedAttribute(Long.class, LargeFileAttributes.READING);
 	}
 	
@@ -146,6 +140,29 @@ public class LdapConnectionFactoryConfig {
 			return;
 		}
 		attribs.remove(attributeName);
+	}
+	
+	public void addConvertedAttribute(Class<?> clazz, I_LdapAttributeName attributeName) {
+		Set<String> attribs = convertedAttributes.get(clazz);
+		if (attribs == null) {
+			attribs = new HashSet<String>();
+			convertedAttributes.put(clazz, attribs);
+		}
+		List<String> aliases = attributeName.getAliases();
+		for (String alias: aliases) {
+			attribs.add(alias);
+		}
+	}
+	
+	public void removeConvertedAttribute(Class<?> clazz, I_LdapAttributeName attributeName) {
+		Set<String> attribs = convertedAttributes.get(clazz);
+		if (attribs == null) {
+			return;
+		}
+		List<String> aliases = attributeName.getAliases();
+		for (String alias: aliases) {
+			attribs.remove(alias);
+		}
 	}
 	
 	public Map<Class<?>, Set<String>> getConvertedAttributes() {

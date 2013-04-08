@@ -20,10 +20,12 @@ import org.adligo.i.adig.client.GRegistry;
 import org.adligo.i.adig.client.I_GInvoker;
 import org.adligo.i.log.client.Log;
 import org.adligo.i.log.client.LogFactory;
+import org.adligo.i.pool.ldap.models.I_LdapAttributeName;
 import org.adligo.i.pool.ldap.models.I_LdapEntry;
 import org.adligo.i.pool.ldap.models.JavaToLdapConverters;
 import org.adligo.i.pool.ldap.models.LargeFileAttributes;
 import org.adligo.i.pool.ldap.models.LargeFileChunkAttributes;
+import org.adligo.i.pool.ldap.models.LargeFileCreationToken;
 import org.adligo.i.pool.ldap.models.LdapEntryMutant;
 
 
@@ -56,9 +58,11 @@ public class ReadWriteLdapConnection extends LdapConnection {
 		try {
 			String dn = entry.getDistinguishedName();
 			BasicAttributes attribs = new BasicAttributes();
-			List<String> keys = entry.getAttributeNames();
-			for (String key: keys) {
-				List<Object> objs = entry.getAttributes(key);
+			List<I_LdapAttributeName> keys = entry.getAttributeNames();
+			for (I_LdapAttributeName name: keys) {
+				List<String> aliases = name.getAliases();
+				String key = aliases.get(0);
+				List<Object> objs = entry.getAttributes(name);
 				if (objs.size() == 1) {
 					Object val = objs.get(0);
 					val = attributeConverter.toLdap(key, val);
@@ -110,27 +114,29 @@ public class ReadWriteLdapConnection extends LdapConnection {
 		I_LdapEntry onDisk = super.get(dn);
 		List<ModificationItem> mods = new ArrayList<ModificationItem>();
 		
-		List<String> newAttribs = e.getAttributeNames();
-		for (String atribName: newAttribs) {
+		List<I_LdapAttributeName> newAttribs = e.getAttributeNames();
+		for (I_LdapAttributeName atribName: newAttribs) {
 			if (!ignoreAttributes.contains(atribName)) {
 				List<Object> atribVals = e.getAttributes(atribName);
 				for (Object val: atribVals) {
 					if (!onDisk.hasAttribute(atribName, val)) {
-						val = attributeConverter.toLdap(atribName, val);
-						mods.add( new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute(atribName, val)));
+						String sName = atribName.getName();
+						val = attributeConverter.toLdap(sName, val);
+						mods.add( new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute(sName, val)));
 					}
 				}
 			}
 		}
 		
-		List<String> oldAttribs = onDisk.getAttributeNames();
-		for (String atribName: oldAttribs) {
+		List<I_LdapAttributeName> oldAttribs = onDisk.getAttributeNames();
+		for (I_LdapAttributeName atribName: oldAttribs) {
 			if (!ignoreAttributes.contains(atribName)) {
 				List<Object> atribVals = onDisk.getAttributes(atribName);
 				for (Object val: atribVals) {
 					if (!e.hasAttribute(atribName, val)) {
-						val = attributeConverter.toLdap(atribName, val);
-						mods.add( new ModificationItem(DirContext.REMOVE_ATTRIBUTE, new BasicAttribute(atribName, val)));
+						String sName = atribName.getName();
+						val = attributeConverter.toLdap(sName, val);
+						mods.add( new ModificationItem(DirContext.REMOVE_ATTRIBUTE, new BasicAttribute(sName, val)));
 					}
 				}
 			}
@@ -165,12 +171,13 @@ public class ReadWriteLdapConnection extends LdapConnection {
 	 * @param val
 	 * @return
 	 */
-	public boolean replaceAttribute(String dn, String attributeName, Object val) {
+	public boolean replaceAttribute(String dn, I_LdapAttributeName attributeName, Object val) {
 		markActive();
 		ModificationItem[] mods = new ModificationItem[1];
 		 
-		val = attributeConverter.toLdap(attributeName, val);
-		mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute(attributeName, val));
+		String name = attributeName.getName();
+		val = attributeConverter.toLdap(name, val);
+		mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute(name, val));
 		try {
 			ctx.modifyAttributes(dn, mods);
 			return true;
@@ -181,6 +188,25 @@ public class ReadWriteLdapConnection extends LdapConnection {
 				if (isOK()) {
 					return replaceAttribute(dn, attributeName, val);
 				}
+			}
+		}
+		return false;
+	}
+	
+	public boolean addAttribute(String dn, I_LdapAttributeName attributeName, Object val) {
+		markActive();
+		ModificationItem[] mods = new ModificationItem[1];
+		 
+		String name = attributeName.getName();
+		val = attributeConverter.toLdap(name, val);
+		mods[0] = new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute(name, val));
+		try {
+			ctx.modifyAttributes(dn, mods);
+			return true;
+		} catch (NamingException x) {
+			log.error(x.getMessage(), x);
+			if (isLdapServerDownException(x)) {
+				reconnect();
 			}
 		}
 		return false;
@@ -204,18 +230,24 @@ public class ReadWriteLdapConnection extends LdapConnection {
 	 *    and the file deleted as it was not a complete write
 	 *    and then try it again?
 	 */
-	public boolean createLargeFile(String fileName, String baseDn, long size, InputStream contentStream) throws IOException {
+	public boolean createLargeFile(LargeFileCreationToken token) throws IOException {
+		
 		markActive();
+		
+		String fileName = token.getFileName();
+		String baseDn = token.getBaseDn();
+		long size = token.getSize();
+		InputStream contentStream = token.getContentStream();
+		String serverCreatedOn = token.getServerCheckedOn();
 		
 		LdapEntryMutant mut = new LdapEntryMutant();
 	    
-	     mut.setDistinguishedName(LargeFileAttributes.FN + "=" + fileName + "," + baseDn);
-	     mut.setAttribute(LargeFileAttributes.FN, fileName);
+	     mut.setDistinguishedName(LargeFileAttributes.FILE_NAME.getName() + "=" + fileName + "," + baseDn);
+	     mut.setAttribute(LargeFileAttributes.FILE_NAME, fileName);
 	     mut.setAttribute(LargeFileAttributes.SIZE, size);
-	     mut.setAttribute(LargeFileAttributes.WT, true);
-	     mut.setAttribute(LargeFileAttributes.RD, 0L);
-	     mut.setAttribute(LargeFileAttributes.DEL, false);
-	     mut.setAttribute(LargeFileAttributes.CK, false);
+	     mut.setAttribute(LargeFileAttributes.WRITING, true);
+	     mut.setAttribute(LargeFileAttributes.READING, 0L);
+	     mut.setAttribute(LargeFileAttributes.DELETING, false);
 	     mut.setAttribute(LargeFileAttributes.OBJECT_CLASS, LargeFileAttributes.LF);
 	     
 		if (!create(mut)) {
@@ -230,11 +262,11 @@ public class ReadWriteLdapConnection extends LdapConnection {
 			contentStream.read(bytes);
 			
 			LdapEntryMutant lem = new LdapEntryMutant();
-			lem.setDistinguishedName(LargeFileChunkAttributes.NBR + "=" + whichChunk + "," + fileDn);
+			lem.setDistinguishedName(LargeFileChunkAttributes.SEQUENCED_NUMBER.getName() + "=" + whichChunk + "," + fileDn);
 			lem.setAttribute(LargeFileChunkAttributes.OBJECT_CLASS, LargeFileChunkAttributes.LFC);
-			lem.setAttribute(LargeFileChunkAttributes.NBR, whichChunk);
+			lem.setAttribute(LargeFileChunkAttributes.SEQUENCED_NUMBER, whichChunk);
 			lem.setAttribute(LargeFileChunkAttributes.SIZE, (long) chunkSize);
-			lem.setAttribute(LargeFileChunkAttributes.BN, bytes);
+			lem.setAttribute(LargeFileChunkAttributes.BINARY, bytes);
 			if (!create(lem)) {
 				return false;
 			}
@@ -245,16 +277,16 @@ public class ReadWriteLdapConnection extends LdapConnection {
 		contentStream.read(bytes);
 		
 		LdapEntryMutant lem = new LdapEntryMutant();
-		lem.setDistinguishedName(LargeFileChunkAttributes.NBR + "=" + whichChunk + "," + fileDn);
+		lem.setDistinguishedName(LargeFileChunkAttributes.SEQUENCED_NUMBER.getName() + "=" + whichChunk + "," + fileDn);
 		lem.setAttribute(LargeFileChunkAttributes.OBJECT_CLASS, LargeFileChunkAttributes.LFC);
-		lem.setAttribute(LargeFileChunkAttributes.NBR, whichChunk);
+		lem.setAttribute(LargeFileChunkAttributes.SEQUENCED_NUMBER, whichChunk);
 		lem.setAttribute(LargeFileChunkAttributes.SIZE, size);
-		lem.setAttribute(LargeFileChunkAttributes.BN, bytes);
+		lem.setAttribute(LargeFileChunkAttributes.BINARY, bytes);
 		if (!create(lem)) {
 			return false;
 		}
 		replaceAttribute(fileDn, LargeFileAttributes.WRITING, false);
-
+		addAttribute(fileDn, LargeFileAttributes.CHECKED_ON_SERVER, serverCreatedOn);
 		return true;
 	}
 	
@@ -269,22 +301,21 @@ public class ReadWriteLdapConnection extends LdapConnection {
 	 * @throws IOException this indicates a problem writing the output through the OutputStream
 	 * 
 	 */
-	public void getLargeFile(String name, OutputStream out) throws IOException {
+	public void getLargeFile(String name, String server, OutputStream out) throws IOException {
 		markActive();
 		I_LdapEntry largeFile = get(name);
 		if (largeFile == null) {
 			throw new IllegalStateException("no file found for " + name);
 		}
-		Boolean deleting = largeFile.getBooleanAttribute(LargeFileAttributes.DEL);
-		if (deleting == null) {
-			 deleting = largeFile.getBooleanAttribute(LargeFileAttributes.DELETING);
-		}
+		Boolean deleting = largeFile.getBooleanAttribute(LargeFileAttributes.DELETING);
 		if (deleting) {
 			throw new IllegalStateException(THE_FILE + name + 
 					IS_CURRENTLY_BEING_DELETED_SO_IT_CAN_NOT_BE_READ);
 		}
+		List<String> checkedOnServers =  largeFile.getStringAttributes(LargeFileAttributes.CHECKED_ON_SERVER);
+		
 		Long time = CLOCK.invoke(null);
-		replaceAttribute(name, LargeFileAttributes.RD, time);
+		replaceAttribute(name, LargeFileAttributes.READING, time);
 		I_LdapEntry chunk = null;
 		 SearchControls controls =
 		            new SearchControls();
@@ -294,15 +325,9 @@ public class ReadWriteLdapConnection extends LdapConnection {
 		List<String> dns = search("", "(objectClass=" + LargeFileChunkAttributes.LFC + ")", controls);
 		
 		for (int chunkNumber = 1; chunkNumber <= dns.size(); chunkNumber++) {
-			chunk = get(LargeFileChunkAttributes.NBR +  "=" + chunkNumber + "," + name);
-			if (chunk == null) {
-				chunk = get(LargeFileChunkAttributes.SEQUENCED_NUMBER +  "=" + chunkNumber + "," + name);
-			}
+			chunk = get(LargeFileChunkAttributes.SEQUENCED_NUMBER.getName() +  "=" + chunkNumber + "," + name);
 			if (chunk != null) {
-				byte [] bytes = (byte []) chunk.getAttribute(LargeFileChunkAttributes.BN);
-				if (bytes == null) {
-					bytes = (byte []) chunk.getAttribute(LargeFileChunkAttributes.BINARY);
-				}
+				byte [] bytes = (byte []) chunk.getAttribute(LargeFileChunkAttributes.BINARY);
 				out.write(bytes);
 				out.flush();
 			}
@@ -327,7 +352,7 @@ public class ReadWriteLdapConnection extends LdapConnection {
 			//someone else deleted it?
 			return true;
 		}
-		replaceAttribute(name, LargeFileAttributes.DEL, true);
+		replaceAttribute(name, LargeFileAttributes.DELETING, true);
 		 SearchControls controls =
 		            new SearchControls();
 		         controls.setSearchScope(
@@ -335,7 +360,7 @@ public class ReadWriteLdapConnection extends LdapConnection {
 		List<String> dns = search("", "(objectClass=" + LargeFileChunkAttributes.LFC + ")", controls);
 		
 		for (int chunkNumber = 1; chunkNumber <= dns.size(); chunkNumber++) {
-			if (!delete(LargeFileChunkAttributes.NBR +  "=" + chunkNumber + "," + name)) {
+			if (!delete(LargeFileChunkAttributes.SEQUENCED_NUMBER +  "=" + chunkNumber + "," + name)) {
 				return false;
 			}
 		} 

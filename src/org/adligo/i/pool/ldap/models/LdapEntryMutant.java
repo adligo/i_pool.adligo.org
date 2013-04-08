@@ -36,6 +36,8 @@ public class LdapEntryMutant implements I_LdapEntry {
 		while (aa.hasMoreElements()) {
 			Attribute attrib = aa.next();
 			String key = attrib.getID();
+			I_LdapAttributeName attributeName = new LdapAttributeName(key);
+			
 			NamingEnumeration<?> objs = attrib.getAll();
 			List<Object> toAdd = new ArrayList<Object>();
 			while (objs.hasMoreElements()) {
@@ -45,9 +47,9 @@ public class LdapEntryMutant implements I_LdapEntry {
 			}
 			if (toAdd.size() == 1) {
 				Object value = toAdd.get(0);
-				attributeMutant.setAttribute(key, value);
+				attributeMutant.setAttribute(attributeName, value);
 			} else if (toAdd.size() >= 2) {
-				attributeMutant.setAttributes(key, toAdd);
+				attributeMutant.setAttributes(attributeName, toAdd);
 			}
 		}
 	}
@@ -59,28 +61,28 @@ public class LdapEntryMutant implements I_LdapEntry {
 		this.distinguishedName = distinguishedName;
 	}
 
-	public void setAttribute(String key, Object value) {
+	public void setAttribute(I_LdapAttributeName key, Object value) {
 		attributeMutant.setAttribute(key, value);
 	}
 
-	public void setAttributes(String key, List<Object> value) {
+	public void setAttributes(I_LdapAttributeName key, List<Object> value) {
 		attributeMutant.setAttributes(key, value);
 	}
 
-	public Object getAttribute(String key) {
+	public Object getAttribute(I_LdapAttributeName key) {
 		return attributeMutant.getAttribute(key);
 	}
 
-	public List<Object> getAttributes(String key) {
+	public List<Object> getAttributes(I_LdapAttributeName key) {
 		return attributeMutant.getAttributes(key);
 	}
 
-	public List<String> getAttributeNames() {
+	public List<I_LdapAttributeName> getAttributeNames() {
 		return attributeMutant.getAttributeNames();
 	}
 	
 	
-	public boolean hasAttribute(String key, Object value) {
+	public boolean hasAttribute(I_LdapAttributeName key, Object value) {
 		return attributeMutant.hasAttribute(key, value);
 	}
 	public String toString() {
@@ -92,79 +94,79 @@ public class LdapEntryMutant implements I_LdapEntry {
 		return sb.toString();
 	}
 
-	public Boolean getBooleanAttribute(String key) {
+	public Boolean getBooleanAttribute(I_LdapAttributeName key) {
 		return attributeMutant.getBooleanAttribute(key);
 	}
 
-	public Integer getIntegerAttribute(String key) {
+	public Integer getIntegerAttribute(I_LdapAttributeName key) {
 		return attributeMutant.getIntegerAttribute(key);
 	}
 
-	public List<Integer> getIntegerAttributes(String key) {
+	public List<Integer> getIntegerAttributes(I_LdapAttributeName key) {
 		return attributeMutant.getIntegerAttributes(key);
 	}
 
-	public Short getShortAttribute(String key) {
+	public Short getShortAttribute(I_LdapAttributeName key) {
 		return attributeMutant.getShortAttribute(key);
 	}
 
-	public Float getFloatAttribute(String key) {
+	public Float getFloatAttribute(I_LdapAttributeName key) {
 		return attributeMutant.getFloatAttribute(key);
 	}
 
-	public Double getDoubleAttribute(String key) {
+	public Double getDoubleAttribute(I_LdapAttributeName key) {
 		return attributeMutant.getDoubleAttribute(key);
 	}
 
-	public BigInteger getBigIntegerAttribute(String key) {
+	public BigInteger getBigIntegerAttribute(I_LdapAttributeName key) {
 		return attributeMutant.getBigIntegerAttribute(key);
 	}
 
-	public BigDecimal getBigDecimalAttribute(String key) {
+	public BigDecimal getBigDecimalAttribute(I_LdapAttributeName key) {
 		return attributeMutant.getBigDecimalAttribute(key);
 	}
 
-	public Date getDateAttribute(String key) {
+	public Date getDateAttribute(I_LdapAttributeName key) {
 		return attributeMutant.getDateAttribute(key);
 	}
 
-	public List<Short> getShortAttributes(String key) {
+	public List<Short> getShortAttributes(I_LdapAttributeName key) {
 		return attributeMutant.getShortAttributes(key);
 	}
 
-	public List<Float> getFloatAttributes(String key) {
+	public List<Float> getFloatAttributes(I_LdapAttributeName key) {
 		return attributeMutant.getFloatAttributes(key);
 	}
 
-	public List<Double> getDoubleAttributes(String key) {
+	public List<Double> getDoubleAttributes(I_LdapAttributeName key) {
 		return attributeMutant.getDoubleAttributes(key);
 	}
 
-	public List<BigInteger> getBigIntegerAttributes(String key) {
+	public List<BigInteger> getBigIntegerAttributes(I_LdapAttributeName key) {
 		return attributeMutant.getBigIntegerAttributes(key);
 	}
 
-	public List<BigDecimal> getBigDecimalAttributes(String key) {
+	public List<BigDecimal> getBigDecimalAttributes(I_LdapAttributeName key) {
 		return attributeMutant.getBigDecimalAttributes(key);
 	}
 
-	public List<Date> getDateAttributes(String key) {
+	public List<Date> getDateAttributes(I_LdapAttributeName key) {
 		return attributeMutant.getDateAttributes(key);
 	}
 
-	public Long getLongAttribute(String key) {
+	public Long getLongAttribute(I_LdapAttributeName key) {
 		return attributeMutant.getLongAttribute(key);
 	}
 
-	public List<Long> getLongAttributes(String key) {
+	public List<Long> getLongAttributes(I_LdapAttributeName key) {
 		return attributeMutant.getLongAttributes(key);
 	}
 
-	public boolean hasAttribute(String key) {
+	public boolean hasAttribute(I_LdapAttributeName key) {
 		return attributeMutant.hasAttribute(key);
 	}
 
-	public List<String> getStringAttributes(String key) {
+	public List<String> getStringAttributes(I_LdapAttributeName key) {
 		return attributeMutant.getStringAttributes(key);
 	}
 	

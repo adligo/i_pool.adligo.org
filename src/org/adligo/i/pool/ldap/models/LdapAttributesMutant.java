@@ -15,7 +15,7 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	public static final String THERE_ARE_MULTIPLE_ATTRIBUTES_FOR_KEY = "There are multiple attributes for key ";
 	public static final String SET_ATTRIBUTE_ERROR = "The value of a attribute may not be a ArrayList," +
 			"as that is used internally for multiple attributes.";
-	private Map<String, Object> attribs = new HashMap<String, Object>();
+	private Map<I_LdapAttributeName, Object> attribs = new HashMap<I_LdapAttributeName, Object>();
 	
 	public LdapAttributesMutant() {}
 	
@@ -24,10 +24,10 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.adligo.i.ldap.I_LdapAttributesMutant#setAttribute(java.lang.String, java.lang.Object)
+	 * @see org.adligo.i.ldap.I_LdapAttributesMutant#setAttribute(org.adligo.i.pool.ldap.models.I_LdapAttributeName, java.lang.Object)
 	 */
 	@Override
-	public void setAttribute(String key, Object value) {
+	public void setAttribute(I_LdapAttributeName key, Object value) {
 		if (value instanceof ArrayList) {
 			throw new IllegalArgumentException(SET_ATTRIBUTE_ERROR);
 		}
@@ -35,18 +35,18 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.adligo.i.ldap.I_LdapAttributesMutant#setAttributes(java.lang.String, java.util.List)
+	 * @see org.adligo.i.ldap.I_LdapAttributesMutant#setAttributes(org.adligo.i.pool.ldap.models.I_LdapAttributeName, java.util.List)
 	 */
 	@Override
-	public void setAttributes(String key, List<Object> value) {
-		attribs.put(key, new ArrayList<Object>(value));
+	public void setAttributes(I_LdapAttributeName name, List<Object> value) {
+		attribs.put(name, new ArrayList<Object>(value));
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.adligo.i.ldap.I_LdapAttributes#getAttribute(java.lang.String)
+	 * @see org.adligo.i.ldap.I_LdapAttributes#getAttribute(org.adligo.i.pool.ldap.models.I_LdapAttributeName)
 	 */
 	@Override
-	public Object getAttribute(String key) {
+	public Object getAttribute(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet instanceof ArrayList) {
 			throw new IllegalArgumentException(THERE_ARE_MULTIPLE_ATTRIBUTES_FOR_KEY + key + 
@@ -56,14 +56,14 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.adligo.i.ldap.I_LdapAttributes#getAttributes(java.lang.String)
+	 * @see org.adligo.i.ldap.I_LdapAttributes#getAttributes(org.adligo.i.pool.ldap.models.I_LdapAttributeName)
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<Object> getAttributes(String key){
+	public List<Object> getAttributes(I_LdapAttributeName key){
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
-			return null;
+			return new ArrayList<Object>();
 		}
 		if ( !(toRet instanceof ArrayList)) {
 			ArrayList<Object> list = new ArrayList<Object>();
@@ -76,9 +76,11 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	@SuppressWarnings("unchecked")
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		Set<Entry<String, Object>> entries = attribs.entrySet();
-		for(Entry<String, Object> e: entries) {
-			String key = e.getKey();
+		Set<Entry<I_LdapAttributeName, Object>> entries = attribs.entrySet();
+		for(Entry<I_LdapAttributeName, Object> e: entries) {
+			I_LdapAttributeName keys = e.getKey();
+			List<String> aliases = keys.getAliases();
+			String key = aliases.get(0);
 			Object val = e.getValue();
 			if (val instanceof ArrayList) {
 				ArrayList<Object> vals = (ArrayList<Object>) val;
@@ -99,12 +101,12 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	}
 
 	@Override
-	public List<String> getAttributeNames() {
-		return new ArrayList<String>(attribs.keySet());
+	public List<I_LdapAttributeName> getAttributeNames() {
+		return new ArrayList<I_LdapAttributeName>(attribs.keySet());
 	}
 	
 	@SuppressWarnings("unchecked")
-	public boolean hasAttribute(String key, Object value) {
+	public boolean hasAttribute(I_LdapAttributeName key, Object value) {
 		if (value == null) {
 			return false;
 		}
@@ -123,7 +125,7 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	}
 
 	@Override
-	public Boolean getBooleanAttribute(String key) {
+	public Boolean getBooleanAttribute(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
 			return null;
@@ -132,7 +134,7 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	}
 
 	@Override
-	public Integer getIntegerAttribute(String key) {
+	public Integer getIntegerAttribute(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
 			return null;
@@ -142,10 +144,10 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Integer> getIntegerAttributes(String key) {
+	public List<Integer> getIntegerAttributes(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
-			return null;
+			return new ArrayList<Integer>();
 		}
 		List<Integer> list = new ArrayList<Integer>();
 		List<Object> toRetList = (List<Object>) toRet;
@@ -157,7 +159,7 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	}
 
 	@Override
-	public Short getShortAttribute(String key) {
+	public Short getShortAttribute(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
 			return null;
@@ -166,7 +168,7 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	}
 
 	@Override
-	public Float getFloatAttribute(String key) {
+	public Float getFloatAttribute(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
 			return null;
@@ -175,7 +177,7 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	}
 
 	@Override
-	public Double getDoubleAttribute(String key) {
+	public Double getDoubleAttribute(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
 			return null;
@@ -184,7 +186,7 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	}
 
 	@Override
-	public BigInteger getBigIntegerAttribute(String key) {
+	public BigInteger getBigIntegerAttribute(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
 			return null;
@@ -193,7 +195,7 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	}
 
 	@Override
-	public BigDecimal getBigDecimalAttribute(String key) {
+	public BigDecimal getBigDecimalAttribute(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
 			return null;
@@ -203,7 +205,7 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 
 	
 	@Override
-	public Date getDateAttribute(String key) {
+	public Date getDateAttribute(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
 			return null;
@@ -213,10 +215,10 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Short> getShortAttributes(String key) {
+	public List<Short> getShortAttributes(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
-			return null;
+			return new ArrayList<Short>();
 		}
 		List<Short> list = new ArrayList<Short>();
 		List<Object> toRetList = (List<Object>) toRet;
@@ -229,10 +231,10 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Float> getFloatAttributes(String key) {
+	public List<Float> getFloatAttributes(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
-			return null;
+			return new ArrayList<Float>();
 		}
 		List<Float> list = new ArrayList<Float>();
 		List<Object> toRetList = (List<Object>) toRet;
@@ -245,10 +247,10 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Double> getDoubleAttributes(String key) {
+	public List<Double> getDoubleAttributes(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
-			return null;
+			return new ArrayList<Double>();
 		}
 		List<Double> list = new ArrayList<Double>();
 		List<Object> toRetList = (List<Object>) toRet;
@@ -261,10 +263,10 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<BigInteger> getBigIntegerAttributes(String key) {
+	public List<BigInteger> getBigIntegerAttributes(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
-			return null;
+			return new ArrayList<BigInteger>();
 		}
 		List<BigInteger> list = new ArrayList<BigInteger>();
 		List<Object> toRetList = (List<Object>) toRet;
@@ -277,10 +279,10 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<BigDecimal> getBigDecimalAttributes(String key) {
+	public List<BigDecimal> getBigDecimalAttributes(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
-			return null;
+			return new ArrayList<BigDecimal>();
 		}
 		List<BigDecimal> list = new ArrayList<BigDecimal>();
 		List<Object> toRetList = (List<Object>) toRet;
@@ -293,10 +295,10 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Date> getDateAttributes(String key) {
+	public List<Date> getDateAttributes(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
-			return null;
+			return new ArrayList<Date>();
 		}
 		List<Date> list = new ArrayList<Date>();
 		List<Object> toRetList = (List<Object>) toRet;
@@ -308,7 +310,7 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	}
 
 	@Override
-	public Long getLongAttribute(String key) {
+	public Long getLongAttribute(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
 			return null;
@@ -318,10 +320,10 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Long> getLongAttributes(String key) {
+	public List<Long> getLongAttributes(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
-			return null;
+			return new ArrayList<Long>();
 		}
 		List<Long> list = new ArrayList<Long>();
 		List<Object> toRetList = (List<Object>) toRet;
@@ -334,10 +336,10 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<String> getStringAttributes(String key) {
+	public List<String> getStringAttributes(I_LdapAttributeName key) {
 		Object toRet = attribs.get(key);
 		if (toRet == null) {
-			return null;
+			return new ArrayList<String>();
 		}
 		List<String> list = new ArrayList<String>();
 		List<Object> toRetList = (List<Object>) toRet;
@@ -349,7 +351,7 @@ public class LdapAttributesMutant implements I_LdapAttributes, I_LdapAttributesM
 	}
 	
 	@Override
-	public boolean hasAttribute(String key) {
+	public boolean hasAttribute(I_LdapAttributeName key) {
 		return attribs.containsKey(key);
 	}
 }
