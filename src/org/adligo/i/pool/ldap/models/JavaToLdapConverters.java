@@ -40,13 +40,17 @@ public class JavaToLdapConverters {
 							" has been entered twice under the classes " + clazz + " and " +
 							converter.getJavaClass());
 				} else {
-					converter = converters.get(clazz);
-					if (converter == null) {
-						throw new IllegalArgumentException("The attribute " + attribute +
-								" requires a converter to the java class " + clazz + 
-								" however one can not be found in the config's AttributeConverters");
+					if ((new byte [0]).getClass().equals(clazz) || String.class.equals(clazz)) {
+						//do nothing
 					} else {
-						attributesToConverters.put(attribute, converter);
+						converter = converters.get(clazz);
+						if (converter == null) {
+							throw new IllegalArgumentException("The attribute " + attribute +
+									" requires a converter to the java class " + clazz + 
+									" however one can not be found in the config's AttributeConverters");
+						} else {
+							attributesToConverters.put(attribute, converter);
+						}
 					}
 				}
 			}

@@ -1,10 +1,12 @@
 package org.adligo.i.pool.ldap.models;
 
-public class LargeFileChunkAttributes extends CommonAttributes {
-	public static final String LFC = "lfc";
-	public static final I_LdapAttributeName SEQUENCED_NUMBER = new LdapAttributeName("nbr", "sequencednumber");
-	public static final I_LdapAttributeName BINARY = new LdapAttributeName("bn", "binary");
-	public static final I_LdapAttributeName SIZE = new LdapAttributeName("size");
+public class LargeFileChunkAttributes extends TopAttributes {
+	public static final String OBJECT_CLASS_NAME = "lfc";
+	
+	public static final I_LdapAttribute BINARY = AdligoOrgAttributes.BINARY;
+	public static final I_LdapAttribute SEQUENCED_NUMBER = AdligoOrgAttributes.SEQUENCED_NUMBER;
+	public static final I_LdapAttribute SIZE = AdligoOrgAttributes.SIZE;
+	
 	
 	private LargeFileChunkAttributes() {}
 }

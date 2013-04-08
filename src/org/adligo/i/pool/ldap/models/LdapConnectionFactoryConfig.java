@@ -43,6 +43,7 @@ public class LdapConnectionFactoryConfig {
 	 */
 	private Map<Class<?>, Set<String>> convertedAttributes = new HashMap<Class<?>, Set<String>>();
 	private Map<Class<?>, I_AttributeConverter<?, ?>> attributeConverters = new HashMap<Class<?>, I_AttributeConverter<?, ?>>();
+	private LdapAttributeLookupMutant attributeLookup = new LdapAttributeLookupMutant();
 	
 	public LdapConnectionFactoryConfig() {
 		attributeConverters.put(Integer.class, new IntegerAttributeConverter());
@@ -55,15 +56,58 @@ public class LdapConnectionFactoryConfig {
 		attributeConverters.put(Long.class, new LongAttributeConverter());
 		attributeConverters.put(Date.class, new DateAttributeConverter());
 		
-		addConvertedAttribute(Long.class, LargeFileAttributes.SIZE);
 
-		addConvertedAttribute(Boolean.class, LargeFileAttributes.WRITING);
+		//core attributes
+		addAttribute(CoreAttributes.ASSOCIATED_NAME);
+		addAttribute(CoreAttributes.BUSINESS_CATEGORY);
+		addAttribute(CoreAttributes.DESCRIPTION);
+		addAttribute(CoreAttributes.DESTINATION_INDICATOR);
+		addAttribute(CoreAttributes.DISTINGUISHED_NAME);
+		addAttribute(CoreAttributes.DOMAIN_COMPONENT);
+		addAttribute(CoreAttributes.FACSIMILE_TELEPHONE_NUMBER);
+		addAttribute(CoreAttributes.INTERNATIONAL_ISDN_NUMBER);
+		addAttribute(CoreAttributes.LOCALITY_NAME);
+		addAttribute(CoreAttributes.NAME);
+		addAttribute(CoreAttributes.OBJECT_CLASS);
+		addAttribute(CoreAttributes.ORGANIZATION_NAME);
+		addAttribute(CoreAttributes.PHYSICAL_DELIVERY_OFFICE_NAME);
+		addAttribute(CoreAttributes.POST_OFFICE_BOX);
+		addAttribute(CoreAttributes.POSTAL_ADDRESS);
+		addAttribute(CoreAttributes.POSTAL_CODE);
+		addAttribute(CoreAttributes.PREFERRED_DELIVERY_METHOD);
+
+		addAttribute(CoreAttributes.REGISTERED_ADDRESS);
+		addAttribute(CoreAttributes.SEARCH_GUIDE);
+		addAttribute(CoreAttributes.SEE_ALSO);
+		addAttribute(CoreAttributes.STATE_OR_PROVINCE_NAME);
+		addAttribute(CoreAttributes.STREET);
 		
-		addConvertedAttribute(Boolean.class, LargeFileAttributes.DELETING);
+		addAttribute(CoreAttributes.TELEPHONE_NUMBER);
+		addAttribute(CoreAttributes.TELEX_NUMBER);
+		addAttribute(CoreAttributes.TELEX_TERMINAL_IDENTIFIER);
 		
-		addConvertedAttribute(Integer.class, LargeFileChunkAttributes.SEQUENCED_NUMBER);
+		addAttribute(CoreAttributes.USER_PASSWORD);
+		addAttribute(CoreAttributes.X121ADDRESS);
 		
-		addConvertedAttribute(Long.class, LargeFileAttributes.READING);
+		//adligo attributes
+		addAttribute(AdligoOrgAttributes.BINARY);
+		addAttribute(AdligoOrgAttributes.CHECKED_ON_SERVER);
+		addAttribute(AdligoOrgAttributes.DELETING);
+		addAttribute(AdligoOrgAttributes.FILE_NAME);
+		
+		addAttribute(AdligoOrgAttributes.SIZE);
+		
+		addAttribute(AdligoOrgAttributes.SEQUENCED_NUMBER);
+		
+		addAttribute(AdligoOrgAttributes.WRITING);
+	}
+
+	public void addAttribute(I_LdapAttribute attribute) {
+		attributeLookup.add(attribute);
+		Class<?> c = attribute.getJavaType();
+		if (!String.class.equals(c)) {
+			addConvertedAttribute(attribute);
+		}
 	}
 	
 	public String getProtocol() {
@@ -142,7 +186,8 @@ public class LdapConnectionFactoryConfig {
 		attribs.remove(attributeName);
 	}
 	
-	public void addConvertedAttribute(Class<?> clazz, I_LdapAttributeName attributeName) {
+	public void addConvertedAttribute(I_LdapAttribute attributeName) {
+		Class<?> clazz = attributeName.getJavaType();
 		Set<String> attribs = convertedAttributes.get(clazz);
 		if (attribs == null) {
 			attribs = new HashSet<String>();
@@ -154,16 +199,6 @@ public class LdapConnectionFactoryConfig {
 		}
 	}
 	
-	public void removeConvertedAttribute(Class<?> clazz, I_LdapAttributeName attributeName) {
-		Set<String> attribs = convertedAttributes.get(clazz);
-		if (attribs == null) {
-			return;
-		}
-		List<String> aliases = attributeName.getAliases();
-		for (String alias: aliases) {
-			attribs.remove(alias);
-		}
-	}
 	
 	public Map<Class<?>, Set<String>> getConvertedAttributes() {
 		return Collections.unmodifiableMap(convertedAttributes);
@@ -179,5 +214,9 @@ public class LdapConnectionFactoryConfig {
 	
 	public Map<Class<?>, I_AttributeConverter<?, ?>> getAttributeConverters() {
 		return Collections.unmodifiableMap(attributeConverters);
+	}
+
+	public LdapAttributeLookupMutant getAttributeLookup() {
+		return attributeLookup;
 	}
 }

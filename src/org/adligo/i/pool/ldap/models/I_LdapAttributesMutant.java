@@ -9,12 +9,12 @@ public interface I_LdapAttributesMutant extends I_LdapAttributes {
 	 * @param name
 	 * @param value
 	 */
-	public abstract void setAttribute(I_LdapAttributeName name, Object value);
+	public abstract void setAttribute(I_LdapAttribute name, Object value);
 
 	/**
 	 * replaces everything that was there before
 	 * @param name
 	 * @param value
 	 */
-	public abstract void setAttributes(I_LdapAttributeName name, List<Object> value);
+	public abstract void setAttributes(I_LdapAttribute name, List<Object> value);
 }

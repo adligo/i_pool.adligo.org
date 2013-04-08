@@ -4,11 +4,32 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class LdapAttributeName implements I_LdapAttributeName {
+/**
+ * This the instances of class are immutable;
+ * 
+ * Note due to implementation details
+ * all names must be present in the list of aliases for most of the 
+ * code in this project to work correctly, therefore
+ * a 
+ * @author scott
+ *
+ */
+public class LdapAttribute implements I_LdapAttribute {
 	public static final String LDAP_ATTRIBUTE_NAME_REQUIRES_NON_NULL_NAME_VALUES = "LdapAttributeName requires non null name values";
 	private List<String> aliases = new ArrayList<String>();
+	private Class<?> javaType = String.class;
+	private int hashCode;
 	
-	public LdapAttributeName(String ...strings) {
+	public LdapAttribute(String ...strings) {
+		setup(strings);
+	}
+	
+	public LdapAttribute(Class<?> pJavaType, String ...strings) {
+		javaType = pJavaType;
+		setup(strings);
+	}
+
+	private void setup(String... strings) {
 		if (strings == null) {
 			throw new IllegalArgumentException(LDAP_ATTRIBUTE_NAME_REQUIRES_NON_NULL_NAME_VALUES);
 		}
@@ -19,6 +40,7 @@ public class LdapAttributeName implements I_LdapAttributeName {
 			aliases.add(s);
 		}
 		aliases = Collections.unmodifiableList(aliases);
+		hashCode = calcHashCode();
 	}
 
 	/* (non-Javadoc)
@@ -30,14 +52,6 @@ public class LdapAttributeName implements I_LdapAttributeName {
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((aliases == null) ? 0 : aliases.hashCode());
-		return result;
-	}
-
-	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -45,11 +59,14 @@ public class LdapAttributeName implements I_LdapAttributeName {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		LdapAttributeName other = (LdapAttributeName) obj;
+		LdapAttribute other = (LdapAttribute) obj;
 		if (aliases == null) {
 			if (other.aliases != null)
 				return false;
 		} else {
+			if (!other.getJavaType().equals(javaType)) {
+				return false;
+			}
 			List<String> otherAliases = other.getAliases();
 			for (String oa: otherAliases) {
 				if (aliases.contains(oa)) {
@@ -60,6 +77,22 @@ public class LdapAttributeName implements I_LdapAttributeName {
 		return true;
 	}
 
+
+	@Override
+	public int hashCode() {
+		return hashCode;
+	}
+	
+	public int calcHashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + javaType.hashCode();
+		for (String alias: aliases) {
+			result = prime * result + alias.hashCode();
+		}
+		return result;
+	}
+	
 	@Override
 	public String getName() {
 		return aliases.get(0);
@@ -68,6 +101,10 @@ public class LdapAttributeName implements I_LdapAttributeName {
 	@Override
 	public String toString() {
 		return "LdapAttributeName [aliases=" + aliases + "]";
+	}
+
+	public Class<?> getJavaType() {
+		return javaType;
 	}
 	
 	

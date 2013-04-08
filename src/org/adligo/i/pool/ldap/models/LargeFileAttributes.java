@@ -1,13 +1,16 @@
 package org.adligo.i.pool.ldap.models;
 
-public class LargeFileAttributes extends CommonAttributes {
-	public static final String LF = "lf";
-	public static final I_LdapAttributeName FILE_NAME = new LdapAttributeName("fn", "fileName");
-	public static final I_LdapAttributeName WRITING = new LdapAttributeName("wt", "writing");
-	public static final I_LdapAttributeName DELETING = new LdapAttributeName("del", "deleting");
-	public static final I_LdapAttributeName READING = new LdapAttributeName("rd", "reading");
-	public static final I_LdapAttributeName CHECKED_ON_SERVER = new LdapAttributeName("ck", "checkedOnServer");
-	public static final I_LdapAttributeName SIZE = new LdapAttributeName("size");
+public class LargeFileAttributes extends TopAttributes {
+	public static final String OBJECT_CLASS_NAME = "lf";
+
+	public static final I_LdapAttribute CHECKED_ON_SERVER = AdligoOrgAttributes.CHECKED_ON_SERVER;
+	public static final I_LdapAttribute DELETING = AdligoOrgAttributes.DELETING;
+
+	public static final I_LdapAttribute FILE_NAME = AdligoOrgAttributes.FILE_NAME;
+
+	public static final I_LdapAttribute SIZE = AdligoOrgAttributes.SIZE;
+
+	public static final I_LdapAttribute WRITING = AdligoOrgAttributes.WRITING;
 	
 	private LargeFileAttributes() {}
 }

@@ -7,11 +7,14 @@ import javax.naming.Context;
 
 import org.adligo.i.pool.I_PooledConnectionFactory;
 import org.adligo.i.pool.ldap.models.JavaToLdapConverters;
+import org.adligo.i.pool.ldap.models.LdapAttributContext;
+import org.adligo.i.pool.ldap.models.LdapAttributeLookup;
 import org.adligo.i.pool.ldap.models.LdapConnectionFactoryConfig;
 
 public class ReadOnlyLdapConnectionFactory implements I_PooledConnectionFactory<ReadOnlyLdapConnection> {
 	private Hashtable env;
-	private JavaToLdapConverters converters;
+	private LdapAttributContext attributCtx;
+	
 	
 	@SuppressWarnings("unchecked")
 	public ReadOnlyLdapConnectionFactory(LdapConnectionFactoryConfig config) {
@@ -25,11 +28,13 @@ public class ReadOnlyLdapConnectionFactory implements I_PooledConnectionFactory<
 			  env.put("java.naming.ldap.attributes.binary", binAttributeNames);
 		  }
 		  env.put(LdapConnection.CHUNK_SIZE_KEY, config.getDefaultChunkSize());
-		  converters = new JavaToLdapConverters(config);
+		  JavaToLdapConverters converters = new JavaToLdapConverters(config);
+		  LdapAttributeLookup lookup = new LdapAttributeLookup(config.getAttributeLookup());
+		  attributCtx = new LdapAttributContext(converters, lookup);
 	}
 
 	@Override
 	public ReadOnlyLdapConnection create() throws IOException {
-		return new ReadOnlyLdapConnection(env, converters);
+		return new ReadOnlyLdapConnection(env, attributCtx);
 	}
 }
