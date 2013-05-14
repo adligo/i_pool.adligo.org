@@ -16,6 +16,7 @@ public class Pool<T extends PooledConnection> {
 	private String name;
 	private volatile int connectionsCreated = 0;
 	private volatile int connectionsDisposed = 0;
+	private volatile boolean shutdown = false;
 	private int min;
 	private int max;
 	private I_PooledConnectionFactory<T>factory;
@@ -24,7 +25,7 @@ public class Pool<T extends PooledConnection> {
 	 */
 	private int reclaimTime = 60000 * 3;
 	
-	public Pool(PoolConfiguration<T> config) {
+	public Pool(I_PoolConfiguration<T> config) {
 		min = config.getMin();
 		max = config.getMax();
 		if (max < min) {
@@ -48,13 +49,20 @@ public class Pool<T extends PooledConnection> {
 	
 	@SuppressWarnings("unchecked")
 	void returnConnection(I_PooledConnection p) {
-		if (!availableConnections.contains(p)) {
-			availableConnections.add((T) p);
-			activeConnections.remove(p);
+		if (shutdown) {
+			p.dispose();
+		} else {
+			if (!availableConnections.contains(p)) {
+				availableConnections.add((T) p);
+				activeConnections.remove(p);
+			}
 		}
 	}
 	
 	public T getConnection() {
+		if (shutdown) {
+			throw new IllegalStateException("This pool " + name + " has been shutdown.");
+		}
 		T toRet = attemptGetConnection(10, TimeUnit.MILLISECONDS);
 		if (toRet != null) {
 			return toRet;
@@ -148,5 +156,9 @@ public class Pool<T extends PooledConnection> {
 				log.warn("Reclaimed connection from pool " + getName());
 			}
 		}
+	}
+	
+	public synchronized void shutdown() {
+		shutdown = true;
 	}
 }
