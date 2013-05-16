@@ -10,7 +10,7 @@ public abstract class PooledConnection implements I_PooledConnection {
 	private Pool<?> pool;
 	private long lastActiveTime;
 	
-	Pool<?> getPool() {
+	I_Pool<?> getPool() {
 		return pool;
 	}
 

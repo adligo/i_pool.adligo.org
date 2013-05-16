@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.adligo.i.log.client.Log;
 import org.adligo.i.log.client.LogFactory;
 
-public class Pool<T extends PooledConnection> {
+public class Pool<T extends PooledConnection> implements I_Pool<T> {
 	private static final Log log = LogFactory.getLog(Pool.class);
 	private ArrayBlockingQueue<T> availableConnections;
 	private ArrayBlockingQueue<T> activeConnections;
@@ -59,6 +59,14 @@ public class Pool<T extends PooledConnection> {
 		}
 	}
 	
+	public boolean isConnectionInPool(T con) {
+		return availableConnections.contains(con);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.adligo.i.pool.I_Pool#getConnection()
+	 */
+	@Override
 	public T getConnection() {
 		if (shutdown) {
 			throw new IllegalStateException("This pool " + name + " has been shutdown.");
@@ -128,6 +136,10 @@ public class Pool<T extends PooledConnection> {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.adligo.i.pool.I_Pool#getStats()
+	 */
+	@Override
 	public I_PoolStats getStats() {
 		PoolStatsMutant psm = new PoolStatsMutant();
 		int avail = availableConnections.size();
@@ -141,6 +153,10 @@ public class Pool<T extends PooledConnection> {
 		return psm;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.adligo.i.pool.I_Pool#getName()
+	 */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -158,6 +174,10 @@ public class Pool<T extends PooledConnection> {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.adligo.i.pool.I_Pool#shutdown()
+	 */
+	@Override
 	public synchronized void shutdown() {
 		shutdown = true;
 	}

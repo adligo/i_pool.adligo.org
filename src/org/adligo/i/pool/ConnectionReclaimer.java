@@ -28,7 +28,7 @@ public class ConnectionReclaimer implements Runnable {
 		pools.add(p);
 	}
 	
-	public void removePool(Pool<?> p) {
+	public void removePool(I_Pool<?> p) {
 		pools.remove(p);
 	}
 }
