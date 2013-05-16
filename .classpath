@@ -6,5 +6,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/adig"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/i_log"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/i_util"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/models_core"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
