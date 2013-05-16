@@ -1,6 +1,8 @@
 package org.adligo.i.pool;
 
-import java.security.InvalidParameterException;
+import org.adligo.models.core.client.InvalidParameterException;
+
+
 
 public class PoolConfiguration<T extends I_PooledConnection> implements I_PoolConfiguration<T> {
 	private PoolConfigurationMutant<T> mutant;

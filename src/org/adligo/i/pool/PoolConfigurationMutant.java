@@ -1,10 +1,12 @@
 package org.adligo.i.pool;
 
-import java.security.InvalidParameterException;
 
 import org.adligo.i.util.client.StringUtils;
+import org.adligo.models.core.client.InvalidParameterException;
 
 public class PoolConfigurationMutant<T extends I_PooledConnection> implements I_PoolConfiguration<T> {
+	public static final String SET_FACTORY = "setFactory";
+	public static final String SET_NAME = "setName";
 	public static final String POOL_CONFIGURATION_REQUIRES_A_NON_NULL_FACTORY = "PoolConfiguration requires a non null factory.";
 	public static final String POOL_CONFIGURATION_REQUIRES_A_NON_EMPTY_NAME = "PoolConfiguration requires a non empty name.";
 	private int _min = 0;
@@ -58,7 +60,7 @@ public class PoolConfigurationMutant<T extends I_PooledConnection> implements I_
 	}
 	public void setName(String name)  throws InvalidParameterException {
 		if (StringUtils.isEmpty(name)) {
-			throw new InvalidParameterException(POOL_CONFIGURATION_REQUIRES_A_NON_EMPTY_NAME);
+			throw new InvalidParameterException(POOL_CONFIGURATION_REQUIRES_A_NON_EMPTY_NAME,SET_NAME);
 		} else {
 			this._name = name;
 		}
@@ -72,7 +74,7 @@ public class PoolConfigurationMutant<T extends I_PooledConnection> implements I_
 	}
 	public void setFactory(I_PooledConnectionFactory<T> factory) throws InvalidParameterException {
 		if (factory == null) {
-			throw new InvalidParameterException(POOL_CONFIGURATION_REQUIRES_A_NON_NULL_FACTORY);
+			throw new InvalidParameterException(POOL_CONFIGURATION_REQUIRES_A_NON_NULL_FACTORY, SET_FACTORY);
 		} else {
 			this._factory = factory;
 		}
