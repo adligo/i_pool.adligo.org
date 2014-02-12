@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.adligo.i.log.client.Log;
-import org.adligo.i.log.client.LogFactory;
+import org.adligo.i.log.shared.Log;
+import org.adligo.i.log.shared.LogFactory;
 
 public class Pool<T extends PooledConnection> implements I_Pool<T> {
 	private static final Log log = LogFactory.getLog(Pool.class);

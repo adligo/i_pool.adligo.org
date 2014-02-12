@@ -1,8 +1,8 @@
 package org.adligo.i.pool;
 
 
-import org.adligo.i.util.client.StringUtils;
-import org.adligo.models.core.client.InvalidParameterException;
+import org.adligo.i.util.shared.StringUtils;
+import org.adligo.models.core.shared.InvalidParameterException;
 
 public class PoolConfigurationMutant<T extends I_PooledConnection> implements I_PoolConfiguration<T> {
 	public static final String SET_FACTORY = "setFactory";

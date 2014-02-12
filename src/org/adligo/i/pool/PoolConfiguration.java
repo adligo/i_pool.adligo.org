@@ -1,6 +1,6 @@
 package org.adligo.i.pool;
 
-import org.adligo.models.core.client.InvalidParameterException;
+import org.adligo.models.core.shared.InvalidParameterException;
 
 
 

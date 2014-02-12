@@ -3,8 +3,8 @@ package org.adligo.i.pool;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.adligo.i.log.client.Log;
-import org.adligo.i.log.client.LogFactory;
+import org.adligo.i.log.shared.Log;
+import org.adligo.i.log.shared.LogFactory;
 
 public class ConnectionReclaimer implements Runnable {
 	private static final Log log = LogFactory.getLog(ConnectionReclaimer.class);
