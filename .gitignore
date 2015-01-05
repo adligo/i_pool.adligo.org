@@ -1,4 +1,6 @@
-classes/
-classes_e/
-bin/
-/i_pool.jar
+/bin/
+/build/
+/classes/
+/classes_e/
+
+i_pool.jar
